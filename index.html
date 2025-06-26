@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <title>ahmed mohamed </title>
+    <style>
+        body {
+            font-family: 'Cairo', Arial, sans-serif;
+            background: linear-gradient(120deg, #cfdef3 0%, #cfdef3 100%);
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 100vw;
+            width: 100vw;
+            margin: 0;
+            background: rgba(255,255,255,0.95);
+            border-radius: 0 0 18px 18px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+            padding: 16px 1vw 8px 1vw;
+            min-height: 80vh;
+        }
+        .center-title {
+            text-align: center;
+            font-size: 2.2em;
+            font-weight: bold;
+            margin-bottom: 14px;
+            margin-top: 8px;
+            color: #1a237e;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 8px #b0c4de;
+        }
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            justify-content: center;
+            align-items: flex-end;
+            margin-bottom: 2px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 180px;
+            flex: 1 1 180px;
+            background: #f5f7fa;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(100,100,200,0.07);
+            padding: 16px 12px 10px 12px;
+            transition: box-shadow 0.2s;
+        }
+        .form-group:focus-within {
+            box-shadow: 0 4px 16px rgba(30,136,229,0.13);
+        }
+        label {
+            margin-bottom: 7px;
+            font-weight: 600;
+            color: #283593;
+            font-size: 1.08em;
+        }
+        select, input[type="text"], input[list] {
+            padding: 10px 8px;
+            border-radius: 6px;
+            border: 1.5px solid #b0bec5;
+            font-size: 1.08em;
+            background: #fff;
+            transition: border 0.2s;
+        }
+        select:focus, input[type="text"]:focus, input[list]:focus {
+            border: 1.5px solid #1976d2;
+            outline: none;
+        }
+        .btns {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 10px;
+        }
+        button {
+            padding: 13px 38px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(90deg, #1976d2 0%, #64b5f6 100%);
+            color: #fff;
+            font-size: 1.15em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(25,118,210,0.10);
+            transition: background 0.2s, transform 0.1s;
+        }
+        button:hover {
+            background: linear-gradient(90deg, #1565c0 0%, #42a5f5 100%);
+            transform: translateY(-2px) scale(1.03);
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 10px;
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(30,136,229,0.07);
+        }
+        th, td {
+            border-bottom: 1.5px solid #e3eafc;
+            padding: 18px 10px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        td {
+            font-size: 0.85em;
+             /* خط بيانات الجدول  */
+        }
+        th {
+            background: linear-gradient(90deg, #1976d2 0%, #64b5f6 100%);
+            color: #fff;
+            font-size: 1.13em;
+            font-weight: bold;
+            letter-spacing: 1px;
+            border: none;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tbody tr:nth-child(even) {
+            background: #dbeafe;
+        }
+        tbody tr:nth-child(odd) {
+            background: #f7fafc;
+        }
+        tbody tr:hover {
+            background: #d1eaff;
+            transition: background 0.2s;
+        }
+        td {
+            border: none;
+            border-right: 1px solid #e3eafc;
+        }
+        td:last-child {
+            border-right: none;
+        }
+        @media (max-width: 900px) {
+            .form-row {
+                flex-direction: column;
+                gap: 12px;
+            }
+            .form-group {
+                min-width: 100%;
+            }
+        }
+        .move-right {
+            margin-right: 40px;
+        }
+        @media (max-width: 900px) {
+            .move-right {
+                margin-right: 0;
+            }
+        }
+        .large-input label {
+            font-size: 1.25em;
+        }
+        .large-input input[list], .large-input input[type="text"] {
+            font-size: 1.25em;
+            padding: 16px 12px;
+        }
+        .same-width-input input[type="text"] {
+            min-width: 180px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .same-width-link-note input[type="text"] {
+            min-width: 180px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .actions-bar {
+            max-width: 1000px;
+            margin: 8px auto 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .actions-left {
+            display: flex;
+            gap: 16px;
+        }
+        .actions-right {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .main-btn {
+            padding: 7px 18px;
+            font-size: 0.98em;
+            border-radius: 6px;
+            background: linear-gradient(90deg,#1976d2 0%,#64b5f6 100%);
+            color: #fff;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(25,118,210,0.10);
+            border: none;
+            cursor: pointer;
+        }
+        .main-btn:hover {
+            background: linear-gradient(90deg,#1565c0 0%,#42a5f5 100%);
+        }
+        .date-input {
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1.5px solid #b0bec5;
+            font-size: 1em;
+        }
+        .filter-btn {
+            padding: 7px 18px;
+            font-size: 0.98em;
+            border-radius: 6px;
+            background: #1976d2;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        .filter-btn:hover {
+            background: #1565c0;
+        }
+        @media (max-width: 900px) {
+            .actions-bar {
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
+            }
+            .actions-left, .actions-right {
+                justify-content: center;
+            }
+        }
+        .login-bar {
+            width: 100vw;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 18px 32px 0 0;
+            box-sizing: border-box;
+        }
+        .login-btn {
+            background: #fff;
+            color: #1976d2;
+            border: 2px solid #1976d2;
+            border-radius: 6px;
+            font-size: 0.98em;
+            font-weight: bold;
+            padding: 7px 18px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .login-btn:hover {
+            background: #1976d2;
+            color: #fff;
+        }
+        .modal-bg {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(30, 55, 100, 0.25);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(30,136,229,0.18);
+            padding: 36px 32px 28px 32px;
+            min-width: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .modal-input {
+            width: 220px;
+            padding: 10px 8px;
+            border-radius: 6px;
+            border: 1.5px solid #b0bec5;
+            font-size: 1.08em;
+            margin-bottom: 16px;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 18px;
+            margin-top: 8px;
+        }
+        .header-bar {
+            width: 100vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 10px;
+        }
+        .header-bar .center-title {
+            flex: 1;
+            text-align: center;
+            margin: 0 auto;
+        }
+        .header-bar .login-btn {
+            position: absolute;
+            right: 32px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .link-cell {
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            direction: ltr;
+            text-align: left;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-bar">
+        <img src="image1.png" alt="logo" style="height:40px; margin-left:12px;">
+        <div class="center-title" style="padding-top: 10px; flex:1; text-align:center; font-size: 2.5em; margin-right: 100px;">On Time</div>
+        <button class="login-btn" id="loginBtn" onclick="handleLoginLogout()" style="margin-top: 5px; position:absolute; right:32px; top:50%; transform:translateY(-50%);">Login 🔐</button>
+    </div>
+    <div id="loginModal" class="modal-bg" style="display:none;">
+        <div class="modal-content">
+            <h2 style="margin-bottom:18px;">Login</h2>
+            <label>Username</label>
+            <input type="text" id="loginUser" class="modal-input" autocomplete="off" onkeydown="if(event.key==='Enter'){doLogin();}">
+            <label>Password</label>
+            <input type="password" id="loginPass" class="modal-input" onkeydown="if(event.key==='Enter'){doLogin();}">
+            <div class="modal-actions">
+                <button onclick="doLogin()" class="main-btn">Login</button>
+                <button onclick="hideLoginModal()" class="filter-btn">Cancel</button>
+            </div>
+            <div id="loginError" style="color:#d32f2f;margin-top:10px;display:none;"></div>
+        </div>
+    </div>
+    <div class="container">
+        <form id="mainForm" onsubmit="return false;">
+            <div class="form-row">
+                <div class="form-group large-input">
+                    <label for="account">Project 🏦</label>
+                    <input list="account-list" id="account" required>
+                    <datalist id="account-list">
+                        <option value="B-Tech">
+                        <option value="Crave">
+                        <option value="Electroulx Complaint">
+                        <option value="Electroulx Digital">
+                        <option value="Electroulx Maintenance">
+                        <option value="Electroulx Outbound">
+                        <option value="Electroulx Sales">
+                        <option value="Fiat">
+                        <option value="Haier">
+                        <option value="Home Center">
+                        <option value="Interface">
+                        <option value="Kansas">
+                        <option value="Minlo Maintenance">
+                        <option value="Minlo Sales">
+                        <option value="Wasla-In">
+                        <option value="Work Force">
+                    </datalist>
+                </div>
+                <div class="form-group large-input">
+                    <label for="Task Name ">Task Name  📝</label>
+                    <input type="text" id="Task Name " required>
+                </div>
+                <div class="form-group large-input">
+                    <label for="From">From  👤</label>
+                    <input list="From-list" id="From" required>
+                    <datalist id="From-list">
+                        <option value="Abd El-Rehem Mohamed">
+                        <option value="Ahmed Mohamed Anwar">
+                        <option value="Alaa Ashour">
+                        <option value="Amir Afifi">
+                        <option value="Asmaa Essam">
+                        <option value="Aya Tarek">
+                        <option value="Ayman Gouda">
+                        <option value="Donia Fathy Eid">
+                        <option value="Ehab Ibarhim">
+                        <option value="Eman Hasaan Awad">
+                        <option value="Habiba Mohamed">
+                        <option value="Habiba Waleed">
+                        <option value="Hanem Mohsen Sayed">
+                        <option value="Hanan Ahmed">
+                        <option value="Heba Elsayed">
+                        <option value="Hossam Farouk">
+                        <option value="Ismail Mostafa">
+                        <option value="Kareem Mohammed">
+                        <option value="Mohamed Sabbah">
+                        <option value="Mohamed Yhia Hamed">
+                        <option value="Mostafa Ahmed Mostafa">
+                        <option value="Nada Mostafa">
+                        <option value="Nermeen Fayek">
+                        <option value="Nesma Mostafa">
+                        <option value="Nour Ahmed">
+                        <option value="Rana Mokhtar">
+                        <option value="Salma Mohamed">
+                        <option value="Samar Musa Barakat">
+                        <option value="Shaimaa Zaky">
+                        <option value="Walid Elzeni">
+                        <option value="Work Force">
+                        <option value="Zeinab Farouk">
+                    </datalist>
+                </div>
+                <div class="form-group large-input">
+                    <label for="engineer">Engineer 💻</label>
+                    <input list="engineer-list" id="engineer" required>
+                    <datalist id="engineer-list">
+                        <option value="Eng-Ahmed">
+                        <option value="Eng-Mohamed">
+                        <option value="Eng-Ahmed & Eng-Mohamed">
+                    </datalist>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group same-width-input">
+                    <label for="text1">Sent Date + Time 📆</label>
+                    <input type="text" id="text1" required>
+                </div>
+                <div class="form-group same-width-input">
+                    <label for="text2">Reply  Date + Time  📆</label>
+                    <input type="text" id="text2" required class="move-right">
+                </div>
+                <div class="form-group same-width-link-note">
+                    <label for="link1">Link 🔗</label>
+                    <input type="text" id="link1" placeholder="https://..." required>
+                </div>
+                <div class="form-group same-width-link-note">
+                    <label for="note">Note 🗒️</label>
+                    <input type="text" id="note" class="move-right">
+                </div>
+            </div>
+            <div class="actions-bar">
+                <div class="actions-left" id="actionsLeft">
+                    <button type="button" onclick="showData()" class="main-btn">Add 📝</button>
+                    <button type="button" onclick="exportToExcel()" class="main-btn" id="exportBtnLeft">Export 📤</button>
+                </div>
+                <div class="actions-right" id="actionsRight">
+                    <label for="filterFrom" style="font-weight:600; margin-left: 120px;">From: <input type="date" id="filterFrom" class="date-input" style="margin-top: 10px;"></label>
+                    <label for="filterTo" style="font-weight:600;">To: <input type="date" id="filterTo" class="date-input" style="margin-top: 10px;"></label>
+                    <button type="button" onclick="renderTable()" class="filter-btn">Filter 🔎</button>
+                    <button type="button" onclick="exportToExcel()" class="main-btn" id="exportBtnRight" style="display:none;">Export 📤</button>
+                </div>
+            </div>
+        </form>
+
+        <table id="dataTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th>Project</th>
+                    <th>Task Name </th>
+                    <th>From</th>
+                    <th>Engineer</th>
+                    <th>Sent Date + Time  </th>
+                    <th>Reply  Date + Time  </th>
+                    <th>Link</th>
+                    <th>Note</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <div class="btns" style="display:none;"></div>
+    <div class="login-bar" style="display:none;"></div>
+    <div class="center-title" style="display:none;" ></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        let tableData = [];
+        let loggedUser = null;
+        // دالة لإظهار نافذة تسجيل الدخول
+        function showLoginModal() {
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('loginUser').value = '';
+            document.getElementById('loginPass').value = '';
+            document.getElementById('loginError').style.display = 'none';
+        }
+        // دالة لإخفاء نافذة تسجيل الدخول
+        function hideLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+        // دالة موحدة للتعامل مع زر الدخول/الخروج
+        function handleLoginLogout() {
+            if (loggedUser) {
+                // تسجيل الخروج
+                loggedUser = null;
+                updateEngineerOptions();
+                updateFormVisibility();
+                updateLoginBtn();
+            } else {
+                showLoginModal();
+            }
+        }
+        // تحديث نص زر الدخول/الخروج
+        function updateLoginBtn() {
+            const btn = document.getElementById('loginBtn');
+            if (loggedUser) {
+                btn.textContent = 'Logout 🚪';
+            } else {
+                btn.textContent = 'Login 🔐';
+            }
+        }
+        // دالة تنفيذ تسجيل الدخول
+        function doLogin() {
+            const user = document.getElementById('loginUser').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+            if ((user === 'ahmed' && pass === '0000') || (user === 'mohamed' && pass === '1111')) {
+                loggedUser = user;
+                hideLoginModal();
+                updateEngineerOptions();
+                updateFormVisibility();
+                updateLoginBtn();
+            } else {
+                document.getElementById('loginError').textContent = '❌ Invalid username or password!';
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+        // تحديث خيارات المهندس واسم الموظف حسب المستخدم
+        function updateEngineerOptions() {
+            const engineerList = document.getElementById('engineer-list');
+            engineerList.innerHTML = '';
+            if (loggedUser === 'ahmed') {
+                engineerList.innerHTML += '<option value="Eng-Ahmed">';
+            } else if (loggedUser === 'mohamed') {
+                engineerList.innerHTML += '<option value="Eng-Mohamed">';
+            }
+            engineerList.innerHTML += '<option value="Eng-Ahmed & Eng-Mohamed">';
+
+            // تحديث قائمة الموظف
+            const FromList = document.getElementById('From-list');
+            FromList.innerHTML = '';
+            if (loggedUser === 'ahmed' || loggedUser === 'mohamed') {
+                FromList.innerHTML += '<option value="Abd El-Rehem Mohamed">';
+                FromList.innerHTML += '<option value="Ahmed Mohamed Anwar">';
+                FromList.innerHTML += '<option value="Alaa Ashour">';
+                FromList.innerHTML += '<option value="Amir Afifi">';
+                FromList.innerHTML += '<option value="Asmaa Essam">';
+                FromList.innerHTML += '<option value="Aya Tarek">';
+                FromList.innerHTML += '<option value="Ayman Gouda">';
+                FromList.innerHTML += '<option value="Donia Fathy Eid">';
+                FromList.innerHTML += '<option value="Ehab Ibarhim">';
+                FromList.innerHTML += '<option value="Eman Hasaan Awad">';
+                FromList.innerHTML += '<option value="Habiba Mohamed">';
+                FromList.innerHTML += '<option value="Habiba Waleed">';
+                FromList.innerHTML += '<option value="Hanem Mohsen Sayed">';
+                FromList.innerHTML += '<option value="Hanan Ahmed">';
+                FromList.innerHTML += '<option value="Heba Elsayed">';
+                FromList.innerHTML += '<option value="Hossam Farouk">';
+                FromList.innerHTML += '<option value="Ismail Mostafa">';
+                FromList.innerHTML += '<option value="Kareem Mohammed">';
+                FromList.innerHTML += '<option value="Mohamed Sabbah">';
+                FromList.innerHTML += '<option value="Mohamed Yhia Hamed">';
+                FromList.innerHTML += '<option value="Mostafa Ahmed Mostafa">';
+                FromList.innerHTML += '<option value="Nada Mostafa">';
+                FromList.innerHTML += '<option value="Nermeen Fayek">';
+                FromList.innerHTML += '<option value="Nesma Mostafa">';
+                FromList.innerHTML += '<option value="Nour Ahmed">';
+                FromList.innerHTML += '<option value="Rana Mokhtar">';
+                FromList.innerHTML += '<option value="Salma Mohamed">';
+                FromList.innerHTML += '<option value="Samar Musa Barakat">';
+                FromList.innerHTML += '<option value="Shaimaa Zaky">';
+                FromList.innerHTML += '<option value="Walid Elzeni">';
+                FromList.innerHTML += '<option value="Work Force">';
+                FromList.innerHTML += '<option value="Zeinab Farouk">';
+            }
+        }
+        // إظهار/إخفاء النموذج والأزرار حسب حالة الدخول
+        function updateFormVisibility() {
+            const formRows = document.querySelectorAll('.form-row, .actions-left');
+            const actionsBar = document.querySelector('.actions-bar');
+            const actionsLeft = document.getElementById('actionsLeft');
+            const actionsRight = document.getElementById('actionsRight');
+            const exportBtnLeft = document.getElementById('exportBtnLeft');
+            const exportBtnRight = document.getElementById('exportBtnRight');
+            const dataTable = document.getElementById('dataTable');
+            if (loggedUser) {
+                formRows.forEach(e => e.style.display = 'flex');
+                if(actionsLeft) actionsLeft.style.display = 'flex';
+                if(actionsBar) actionsBar.style.display = 'flex';
+                if(actionsRight) actionsRight.style.display = 'flex';
+                if(exportBtnLeft) exportBtnLeft.style.display = 'inline-block';
+                if(exportBtnRight) exportBtnRight.style.display = 'none';
+                if(dataTable) dataTable.style.display = tableData.length ? '' : 'none';
+            } else {
+                formRows.forEach(e => e.style.display = 'none');
+                if(actionsLeft) actionsLeft.style.display = 'none';
+                if(actionsBar) actionsBar.style.display = 'flex';
+                if(actionsRight) actionsRight.style.display = 'flex';
+                if(exportBtnLeft) exportBtnLeft.style.display = 'none';
+                if(exportBtnRight) exportBtnRight.style.display = 'inline-block';
+                if(dataTable) dataTable.style.display = tableData.length ? '' : 'none';
+            }
+            renderTable();
+        }
+        // عند تحميل الصفحة، إخفاء النموذج إذا لم يتم تسجيل الدخول
+        window.onload = function() {
+            updateFormVisibility();
+            updateLoginBtn();
+            setCurrentDateTimeToTextFields();
+        };
+        // دالة لتعبئة text1 و text2 بتاريخ ووقت الآن
+        function setCurrentDateTimeToTextFields() {
+            const now = new Date();
+            const formatted = formatDateTime(now);
+            document.getElementById('text1').value = formatted;
+            document.getElementById('text2').value = formatted;
+        }
+        // دالة لمسح جميع الحقول بعد الإضافة أو الإظهار
+        function clearInputs() {
+            document.getElementById('account').value = '';
+            document.getElementById('Task Name ').value = '';
+            document.getElementById('From').value = '';
+            document.getElementById('engineer').value = '';
+            document.getElementById('text1').value = '';
+            document.getElementById('text2').value = '';
+            document.getElementById('link1').value = '';
+            document.getElementById('note').value = '';
+        }
+        // دالة لإضافة البيانات المدخلة إلى الجدول بعد التحقق
+        function showData() {
+            const account = document.getElementById('account').value;
+            const TaskName  = document.getElementById('Task Name ').value;
+            const From  = document.getElementById('From').value;
+            const engineer = document.getElementById('engineer').value;
+            const text1 = document.getElementById('text1').value;
+            const text2 = document.getElementById('text2').value;
+            const link1 = document.getElementById('link1').value;
+            const note = document.getElementById('note').value;
+            if (!account || !From  || !engineer) {
+                alert('⚠️ Please select Project, From, and Engineer first!');
+                return;
+            }
+            const row = [account, TaskName , From, engineer, text1, text2, link1, note];
+            if (tableData.some(r => JSON.stringify(r.data) === JSON.stringify(row))) {
+                alert('ℹ️ This row already exists in the table!');
+                return;
+            }
+            const today = new Date();
+            const dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+            tableData.push({data: row, date: dateStr, user: loggedUser});
+            renderTable();
+            clearInputs();
+            setCurrentDateTimeToTextFields();s
+        }
+        // دالة لإعادة رسم الجدول بناءً على البيانات الحالية
+        function renderTable() {
+            const table = document.getElementById('dataTable');
+            const thead = table.querySelector('thead tr');
+            const tbody = table.querySelector('tbody');
+            tbody.innerHTML = '';
+            // تحديث رأس الجدول لإضافة عمود الحذف فقط عند تسجيل الدخول
+            if (thead) {
+                // إعادة بناء رأس الجدول
+                thead.innerHTML = `
+                    <th>Project</th>
+                    <th>Task Name </th>
+                    <th>From</th>
+                    <th>Engineer</th>
+                    <th>Sent Date + Time  </th>
+                    <th>Reply  Date + Time  </th>
+                    <th>Link</th>
+                    <th>Note</th>
+                    <th>Date</th>
+                    ${loggedUser ? '<th>Delete</th>' : ''}
+                `;
+            }
+            // فلترة حسب التاريخ
+            const from = document.getElementById('filterFrom').value;
+            const to = document.getElementById('filterTo').value;
+            let filteredData = tableData;
+            if (from) {
+                filteredData = filteredData.filter(rowObj => rowObj.date >= from);
+            }
+            if (to) {
+                filteredData = filteredData.filter(rowObj => rowObj.date <= to);
+            }
+            filteredData.forEach((rowObj, idx) => {
+                const tr = document.createElement('tr');
+                rowObj.data.forEach((cell, i) => {
+                    const td = document.createElement('td');
+                    // إذا كان text1 أو text2 (index 4 أو 5)
+                    if(i === 4 || i === 5) {
+                        td.textContent = formatDateTime(cell);
+                    } else {
+                        td.textContent = cell;
+                    }
+                    td.style.textAlign = 'center';
+                    td.style.verticalAlign = 'middle';
+                    // إذا كان العمود هو الرابط (العمود السابع index 6)
+                    if(i === 6) {
+                        td.classList.add('link-cell');
+                        td.title = cell; // لعرض الرابط كامل عند الوقوف عليه
+                    }
+                    tr.appendChild(td);
+                });
+                // عمود التاريخ
+                const dateTd = document.createElement('td');
+                dateTd.textContent = rowObj.date;
+                dateTd.style.textAlign = 'center';
+                tr.appendChild(dateTd);
+                // عمود الحذف فقط إذا كان المستخدم الحالي هو من أضاف الصف
+                if (loggedUser) {
+                    const deleteTd = document.createElement('td');
+                    if (rowObj.user === loggedUser) {
+                        deleteTd.innerHTML = '<span style="cursor:pointer;color:#d32f2f;font-size:1.5em;" title="Delete" onclick="deleteRow(' + tableData.indexOf(rowObj) + ')">🗑️</span>';
+                    } else {
+                        deleteTd.innerHTML = '';
+                    }
+                    deleteTd.style.textAlign = 'center';
+                    tr.appendChild(deleteTd);
+                }
+                tbody.appendChild(tr);
+            });
+            table.style.display = filteredData.length ? '' : 'none';
+        }
+        // دالة حذف صف حسب index
+        function deleteRow(idx) {
+            if (typeof idx === 'number' && idx >= 0 && idx < tableData.length) {
+                if (confirm('Are you sure you want to delete this row?')) {
+                    tableData.splice(idx, 1);
+                    renderTable();
+                }
+            }
+        }
+        // دالة لتحويل datetime-local إلى الشكل المطلوب
+        function formatDateTime(dt) {
+            if (!dt) return '';
+            let date;
+            if (typeof dt === 'string') {
+                date = new Date(dt);
+            } else {
+                date = dt;
+            }
+            if (isNaN(date.getTime())) return dt;
+            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
+            return date.toLocaleString('en-US', options);
+        }
+        // دالة لتصدير البيانات الظاهرة في الجدول إلى ملف إكسل
+        function exportToExcel() {
+            if (tableData.length === 0) {
+                alert('⚠️ Please enter data first by clicking Show 👁️');
+                return;
+            }
+            const ws = XLSX.utils.aoa_to_sheet([
+                ['Project 🏦','Task Name  📝','From  👤','Engineer 💻','Sent Date + Time  📆','Reply  Date + Time   📆','Link 🔗','Note 🗒️'],
+                ...tableData.map(rowObj => rowObj.data)
+            ]);
+            // Center align all cells
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            for(let R = range.s.r; R <= range.e.r; ++R) {
+                for(let C = range.s.c; C <= range.e.c; ++C) {
+                    const cell = ws[XLSX.utils.encode_cell({r:R, c:C})];
+                    if(cell) {
+                        cell.s = { alignment: { horizontal: "center", vertical: "center" } };
+                    }
+                }
+            }
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+            XLSX.writeFile(wb, 'time.xlsx');
+            clearInputs();
+        }
+    </script>
+</body>
+</html>
