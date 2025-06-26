@@ -470,11 +470,11 @@
     <div class="btns" style="display:none;"></div>
     <div class="login-bar" style="display:none;"></div>
     <div class="center-title" style="display:none;" ></div>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script>
+    <script type="module">
+        // Import Firebase SDKs from CDN
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+
         // Firebase config
         const firebaseConfig = {
             apiKey: "AIzaSyBMpZrIcl581olRkaQBKA44OpW0XK5P-Co",
@@ -486,65 +486,37 @@
             measurementId: "G-QFF0PMZ8XV"
         };
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        firebase.analytics();
-        const db = firebase.firestore();
-        let tableData = [];
-        let loggedUser = null;
-        // تحميل البيانات من Firestore عند بداية الصفحة
-        async function loadDataFromFirestore() {
-            tableData = [];
-            const snapshot = await db.collection('tasks').get();
-            snapshot.forEach(doc => {
-                tableData.push(doc.data());
-            });
-            renderTable();
-        }
-        // إضافة البيانات إلى Firestore
-        async function showData() {
-            const account = document.getElementById('account').value;
-            const TaskName  = document.getElementById('Task Name ').value;
-            const From  = document.getElementById('From').value;
-            const engineer = document.getElementById('engineer').value;
-            const text1 = document.getElementById('text1').value;
-            const text2 = document.getElementById('text2').value;
-            const link1 = document.getElementById('link1').value;
-            const note = document.getElementById('note').value;
-            if (!account || !From  || !engineer) {
-                alert('⚠️ Please select Project, From, and Engineer first!');
-                return;
-            }
-            const row = [account, TaskName , From, engineer, text1, text2, link1, note];
-            // تحقق من التكرار
-            if (tableData.some(r => JSON.stringify(r.data) === JSON.stringify(row))) {
-                alert('ℹ️ This row already exists in the table!');
-                return;
-            }
-            const today = new Date();
-            const dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
-            const docObj = {data: row, date: dateStr, user: loggedUser, id: Date.now().toString()};
-            await db.collection('tasks').doc(docObj.id).set(docObj);
-            await loadDataFromFirestore();
-            clearInputs();
-            setCurrentDateTimeToTextFields();
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Firestore collection reference
+        const tableCollection = collection(db, "tableData");
+
+        // مزامنة البيانات تلقائياً
+        window.tableData = [];
+        onSnapshot(tableCollection, (snapshot) => {
+            window.tableData = snapshot.docs.map(doc => ({ ...doc.data(), _id: doc.id }));
+            if (window.renderTable) window.renderTable();
+        });
+
+        // إضافة صف جديد إلى Firestore
+        window.addRowToFirestore = async function(row, date, user) {
+            await addDoc(tableCollection, { data: row, date, user });
         }
         // حذف صف من Firestore
-        async function deleteRow(idx) {
-            if (typeof idx === 'number' && idx >= 0 && idx < tableData.length) {
-                if (confirm('Are you sure you want to delete this row?')) {
-                    const docId = tableData[idx].id;
-                    await db.collection('tasks').doc(docId).delete();
-                    await loadDataFromFirestore();
-                }
-            }
+        window.deleteRowFromFirestore = async function(id) {
+            await deleteDoc(doc(db, "tableData", id));
         }
-        // عند تحميل الصفحة، تحميل البيانات من Firestore
-        window.onload = function() {
-            updateFormVisibility();
-            updateLoginBtn();
-            setCurrentDateTimeToTextFields();
-            loadDataFromFirestore();
-        };
+        // تحميل كل البيانات (غير مستخدمة غالباً بسبب onSnapshot)
+        window.loadAllRowsFromFirestore = async function() {
+            const snapshot = await getDocs(tableCollection);
+            window.tableData = snapshot.docs.map(doc => ({ ...doc.data(), _id: doc.id }));
+            if (window.renderTable) window.renderTable();
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        let loggedUser = null;
         // دالة لإظهار نافذة تسجيل الدخول
         function showLoginModal() {
             document.getElementById('loginModal').style.display = 'flex';
@@ -657,7 +629,7 @@
                 if(actionsRight) actionsRight.style.display = 'flex';
                 if(exportBtnLeft) exportBtnLeft.style.display = 'inline-block';
                 if(exportBtnRight) exportBtnRight.style.display = 'none';
-                if(dataTable) dataTable.style.display = tableData.length ? '' : 'none';
+                if(dataTable) dataTable.style.display = window.tableData.length ? '' : 'none';
             } else {
                 formRows.forEach(e => e.style.display = 'none');
                 if(actionsLeft) actionsLeft.style.display = 'none';
@@ -665,10 +637,16 @@
                 if(actionsRight) actionsRight.style.display = 'flex';
                 if(exportBtnLeft) exportBtnLeft.style.display = 'none';
                 if(exportBtnRight) exportBtnRight.style.display = 'inline-block';
-                if(dataTable) dataTable.style.display = tableData.length ? '' : 'none';
+                if(dataTable) dataTable.style.display = window.tableData.length ? '' : 'none';
             }
             renderTable();
         }
+        // عند تحميل الصفحة، إخفاء النموذج إذا لم يتم تسجيل الدخول
+        window.onload = function() {
+            updateFormVisibility();
+            updateLoginBtn();
+            setCurrentDateTimeToTextFields();
+        };
         // دالة لتعبئة text1 و text2 بتاريخ ووقت الآن
         function setCurrentDateTimeToTextFields() {
             const now = new Date();
@@ -686,6 +664,41 @@
             document.getElementById('text2').value = '';
             document.getElementById('link1').value = '';
             document.getElementById('note').value = '';
+        }
+        // دالة لإضافة البيانات المدخلة إلى الجدول بعد التحقق
+        async function showData() {
+            const account = document.getElementById('account').value;
+            const TaskName  = document.getElementById('Task Name ').value;
+            const From  = document.getElementById('From').value;
+            const engineer = document.getElementById('engineer').value;
+            const text1 = document.getElementById('text1').value;
+            const text2 = document.getElementById('text2').value;
+            const link1 = document.getElementById('link1').value;
+            const note = document.getElementById('note').value;
+            if (!account || !From  || !engineer) {
+                alert('⚠️ Please select Project, From, and Engineer first!');
+                return;
+            }
+            const row = [account, TaskName , From, engineer, text1, text2, link1, note];
+            // تحقق من التكرار في Firestore
+            if (window.tableData.some(r => JSON.stringify(r.data) === JSON.stringify(row))) {
+                alert('ℹ️ This row already exists in the table!');
+                return;
+            }
+            const today = new Date();
+            const dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+            await window.addRowToFirestore(row, dateStr, loggedUser);
+            clearInputs();
+            setCurrentDateTimeToTextFields();
+        }
+        // دالة حذف صف حسب index
+        async function deleteRow(idx) {
+            if (typeof idx === 'number' && idx >= 0 && idx < window.tableData.length) {
+                if (confirm('Are you sure you want to delete this row?')) {
+                    const id = window.tableData[idx]._id;
+                    await window.deleteRowFromFirestore(id);
+                }
+            }
         }
         // دالة لإعادة رسم الجدول بناءً على البيانات الحالية
         function renderTable() {
@@ -712,7 +725,7 @@
             // فلترة حسب التاريخ
             const from = document.getElementById('filterFrom').value;
             const to = document.getElementById('filterTo').value;
-            let filteredData = tableData;
+            let filteredData = window.tableData;
             if (from) {
                 filteredData = filteredData.filter(rowObj => rowObj.date >= from);
             }
@@ -747,7 +760,7 @@
                 if (loggedUser) {
                     const deleteTd = document.createElement('td');
                     if (rowObj.user === loggedUser) {
-                        deleteTd.innerHTML = '<span style="cursor:pointer;color:#d32f2f;font-size:1.5em;" title="Delete" onclick="deleteRow(' + tableData.indexOf(rowObj) + ')">🗑️</span>';
+                        deleteTd.innerHTML = '<span style="cursor:pointer;color:#d32f2f;font-size:1.5em;" title="Delete" onclick="deleteRow(' + filteredData.indexOf(rowObj) + ')">🗑️</span>';
                     } else {
                         deleteTd.innerHTML = '';
                     }
@@ -758,15 +771,28 @@
             });
             table.style.display = filteredData.length ? '' : 'none';
         }
+        // دالة لتحويل datetime-local إلى الشكل المطلوب
+        function formatDateTime(dt) {
+            if (!dt) return '';
+            let date;
+            if (typeof dt === 'string') {
+                date = new Date(dt);
+            } else {
+                date = dt;
+            }
+            if (isNaN(date.getTime())) return dt;
+            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
+            return date.toLocaleString('en-US', options);
+        }
         // دالة لتصدير البيانات الظاهرة في الجدول إلى ملف إكسل
         function exportToExcel() {
-            if (tableData.length === 0) {
+            if (window.tableData.length === 0) {
                 alert('⚠️ Please enter data first by clicking Show 👁️');
                 return;
             }
             const ws = XLSX.utils.aoa_to_sheet([
                 ['Project 🏦','Task Name  📝','From  👤','Engineer 💻','Sent Date + Time  📆','Reply  Date + Time   📆','Link 🔗','Note 🗒️'],
-                ...tableData.map(rowObj => rowObj.data)
+                ...window.tableData.map(rowObj => rowObj.data)
             ]);
             // Center align all cells
             const range = XLSX.utils.decode_range(ws['!ref']);
@@ -782,19 +808,6 @@
             XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
             XLSX.writeFile(wb, 'time.xlsx');
             clearInputs();
-        }
-        // دالة لتحويل datetime-local إلى الشكل المطلوب
-        function formatDateTime(dt) {
-            if (!dt) return '';
-            let date;
-            if (typeof dt === 'string') {
-                date = new Date(dt);
-            } else {
-                date = dt;
-            }
-            if (isNaN(date.getTime())) return dt;
-            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
-            return date.toLocaleString('en-US', options);
         }
     </script>
 </body>
