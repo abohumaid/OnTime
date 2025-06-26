@@ -2,7 +2,8 @@
 <html lang="ar" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <title>ahmed mohamed </title>
+    <title> On Time  </title>
+    <link rel="icon" type="image/x-icon" href="image1.png">
     <style>
         body {
             font-family: 'Cairo', Arial, sans-serif;
@@ -318,6 +319,10 @@
             cursor: pointer;
         }
     </style>
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <div class="header-bar">
@@ -471,8 +476,22 @@
     <div class="center-title" style="display:none;" ></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
+        // Firebase config
+        const firebaseConfig = {
+          apiKey: "AIzaSyBMpZrIcl581olRkaQBKA44OpW0XK5P-Co",
+          authDomain: "on-time-f6cf7.firebaseapp.com",
+          projectId: "on-time-f6cf7",
+          storageBucket: "on-time-f6cf7.appspot.com",
+          messagingSenderId: "497476720558",
+          appId: "1:497476720558:web:989192ade8204b56cb1a3f",
+          measurementId: "G-QFF0PMZ8XV"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
         let tableData = [];
         let loggedUser = null;
+        let unsubscribeTasks = null;
         // دالة لإظهار نافذة تسجيل الدخول
         function showLoginModal() {
             document.getElementById('loginModal').style.display = 'flex';
@@ -602,6 +621,7 @@
             updateFormVisibility();
             updateLoginBtn();
             setCurrentDateTimeToTextFields();
+            subscribeToTasks();
         };
         // دالة لتعبئة text1 و text2 بتاريخ ووقت الآن
         function setCurrentDateTimeToTextFields() {
@@ -621,8 +641,21 @@
             document.getElementById('link1').value = '';
             document.getElementById('note').value = '';
         }
+        // دالة لجلب البيانات من Firestore وتحديث الجدول تلقائياً
+        function subscribeToTasks() {
+            if (unsubscribeTasks) unsubscribeTasks();
+            unsubscribeTasks = db.collection('tasks').orderBy('date', 'desc').onSnapshot(snapshot => {
+                tableData = [];
+                snapshot.forEach(doc => {
+                    const rowObj = doc.data();
+                    rowObj._id = doc.id;
+                    tableData.push(rowObj);
+                });
+                renderTable();
+            });
+        }
         // دالة لإضافة البيانات المدخلة إلى الجدول بعد التحقق
-        function showData() {
+        async function showData() {
             const account = document.getElementById('account').value;
             const TaskName  = document.getElementById('Task Name ').value;
             const From  = document.getElementById('From').value;
@@ -636,16 +669,21 @@
                 return;
             }
             const row = [account, TaskName , From, engineer, text1, text2, link1, note];
-            if (tableData.some(r => JSON.stringify(r.data) === JSON.stringify(row))) {
+            // تحقق من التكرار في Firestore
+            const duplicate = tableData.some(r => JSON.stringify(r.data) === JSON.stringify(row));
+            if (duplicate) {
                 alert('ℹ️ This row already exists in the table!');
                 return;
             }
             const today = new Date();
             const dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
-            tableData.push({data: row, date: dateStr, user: loggedUser});
-            renderTable();
+            await db.collection('tasks').add({
+                data: row,
+                date: dateStr,
+                user: loggedUser
+            });
             clearInputs();
-            setCurrentDateTimeToTextFields();s
+            setCurrentDateTimeToTextFields();
         }
         // دالة لإعادة رسم الجدول بناءً على البيانات الحالية
         function renderTable() {
@@ -719,11 +757,13 @@
             table.style.display = filteredData.length ? '' : 'none';
         }
         // دالة حذف صف حسب index
-        function deleteRow(idx) {
+        async function deleteRow(idx) {
             if (typeof idx === 'number' && idx >= 0 && idx < tableData.length) {
                 if (confirm('Are you sure you want to delete this row?')) {
-                    tableData.splice(idx, 1);
-                    renderTable();
+                    const docId = tableData[idx]._id;
+                    if (docId) {
+                        await db.collection('tasks').doc(docId).delete();
+                    }
                 }
             }
         }
