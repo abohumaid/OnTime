@@ -319,10 +319,6 @@
             cursor: pointer;
         }
     </style>
-    <!-- Firebase App (the core Firebase SDK) -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <!-- Firebase Firestore -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <div class="header-bar">
@@ -475,6 +471,10 @@
     <div class="login-bar" style="display:none;"></div>
     <div class="center-title" style="display:none;" ></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <!-- Add Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
     <script>
         // Firebase config
         const firebaseConfig = {
@@ -491,7 +491,6 @@
         const db = firebase.firestore();
         let tableData = [];
         let loggedUser = null;
-        let unsubscribeTasks = null;
         // دالة لإظهار نافذة تسجيل الدخول
         function showLoginModal() {
             document.getElementById('loginModal').style.display = 'flex';
@@ -621,7 +620,6 @@
             updateFormVisibility();
             updateLoginBtn();
             setCurrentDateTimeToTextFields();
-            subscribeToTasks();
         };
         // دالة لتعبئة text1 و text2 بتاريخ ووقت الآن
         function setCurrentDateTimeToTextFields() {
@@ -641,19 +639,6 @@
             document.getElementById('link1').value = '';
             document.getElementById('note').value = '';
         }
-        // دالة لجلب البيانات من Firestore وتحديث الجدول تلقائياً
-        function subscribeToTasks() {
-            if (unsubscribeTasks) unsubscribeTasks();
-            unsubscribeTasks = db.collection('tasks').orderBy('date', 'desc').onSnapshot(snapshot => {
-                tableData = [];
-                snapshot.forEach(doc => {
-                    const rowObj = doc.data();
-                    rowObj._id = doc.id;
-                    tableData.push(rowObj);
-                });
-                renderTable();
-            });
-        }
         // دالة لإضافة البيانات المدخلة إلى الجدول بعد التحقق
         async function showData() {
             const account = document.getElementById('account').value;
@@ -670,8 +655,10 @@
             }
             const row = [account, TaskName , From, engineer, text1, text2, link1, note];
             // تحقق من التكرار في Firestore
-            const duplicate = tableData.some(r => JSON.stringify(r.data) === JSON.stringify(row));
-            if (duplicate) {
+            const snapshot = await db.collection('tasks')
+                .where('data', '==', row)
+                .get();
+            if (!snapshot.empty) {
                 alert('ℹ️ This row already exists in the table!');
                 return;
             }
@@ -680,11 +667,22 @@
             await db.collection('tasks').add({
                 data: row,
                 date: dateStr,
-                user: loggedUser
+                user: loggedUser,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             clearInputs();
             setCurrentDateTimeToTextFields();
         }
+        // مستمع لجلب البيانات من Firestore وتحديث الجدول تلقائياً
+        db.collection('tasks').orderBy('createdAt').onSnapshot((querySnapshot) => {
+            tableData = [];
+            querySnapshot.forEach((doc) => {
+                const rowObj = doc.data();
+                rowObj.id = doc.id; // حفظ معرف المستند للحذف
+                tableData.push(rowObj);
+            });
+            renderTable();
+        });
         // دالة لإعادة رسم الجدول بناءً على البيانات الحالية
         function renderTable() {
             const table = document.getElementById('dataTable');
@@ -760,9 +758,9 @@
         async function deleteRow(idx) {
             if (typeof idx === 'number' && idx >= 0 && idx < tableData.length) {
                 if (confirm('Are you sure you want to delete this row?')) {
-                    const docId = tableData[idx]._id;
-                    if (docId) {
-                        await db.collection('tasks').doc(docId).delete();
+                    const rowObj = tableData[idx];
+                    if (rowObj.id) {
+                        await db.collection('tasks').doc(rowObj.id).delete();
                     }
                 }
             }
