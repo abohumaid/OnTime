@@ -667,29 +667,39 @@
         }
         // دالة لإضافة البيانات المدخلة إلى الجدول بعد التحقق
         async function showData() {
-            const account = document.getElementById('account').value;
-            const TaskName  = document.getElementById('Task Name ').value;
-            const From  = document.getElementById('From').value;
-            const engineer = document.getElementById('engineer').value;
-            const text1 = document.getElementById('text1').value;
-            const text2 = document.getElementById('text2').value;
-            const link1 = document.getElementById('link1').value;
-            const note = document.getElementById('note').value;
-            if (!account || !From  || !engineer) {
-                alert('⚠️ Please select Project, From, and Engineer first!');
+            console.log('showData called');
+            if (!window.addRowToFirestore) {
+                alert('Firebase is not ready yet. Please wait a few seconds and try again.');
                 return;
             }
-            const row = [account, TaskName , From, engineer, text1, text2, link1, note];
-            // تحقق من التكرار في Firestore
-            if (window.tableData.some(r => JSON.stringify(r.data) === JSON.stringify(row))) {
-                alert('ℹ️ This row already exists in the table!');
-                return;
+            try {
+                const account = document.getElementById('account').value;
+                const TaskName  = document.getElementById('Task Name ').value;
+                const From  = document.getElementById('From').value;
+                const engineer = document.getElementById('engineer').value;
+                const text1 = document.getElementById('text1').value;
+                const text2 = document.getElementById('text2').value;
+                const link1 = document.getElementById('link1').value;
+                const note = document.getElementById('note').value;
+                if (!account || !From  || !engineer) {
+                    alert('⚠️ Please select Project, From, and Engineer first!');
+                    return;
+                }
+                const row = [account, TaskName , From, engineer, text1, text2, link1, note];
+                // تحقق من التكرار في Firestore
+                if (window.tableData.some(r => JSON.stringify(r.data) === JSON.stringify(row))) {
+                    alert('ℹ️ This row already exists in the table!');
+                    return;
+                }
+                const today = new Date();
+                const dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+                await window.addRowToFirestore(row, dateStr, loggedUser);
+                clearInputs();
+                setCurrentDateTimeToTextFields();
+            } catch (err) {
+                alert('حدث خطأ أثناء إضافة البيانات: ' + (err.message || err));
+                console.error('Add error:', err);
             }
-            const today = new Date();
-            const dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
-            await window.addRowToFirestore(row, dateStr, loggedUser);
-            clearInputs();
-            setCurrentDateTimeToTextFields();
         }
         // دالة حذف صف حسب index
         async function deleteRow(idx) {
