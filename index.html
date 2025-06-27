@@ -318,6 +318,12 @@
             cursor: pointer;
         }
     </style>
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <!-- Firebase Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+    <!-- Firebase Analytics (اختياري) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics-compat.js"></script>
 </head>
 <body>
     <div class="header-bar">
@@ -470,87 +476,24 @@
     <div class="login-bar" style="display:none;"></div>
     <div class="center-title" style="display:none;" ></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Add Firebase SDK -->
-    <script type="module">
-        // Import the functions you need from the Firebase SDK
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-        // Your web app's Firebase configuration
+    <script>
+        // Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyDBoIsI328sm7AjfbXo3gZP_WbCxD6dI08",
-            authDomain: "ooontime.firebaseapp.com",
-            databaseURL: "https://ooontime-default-rtdb.firebaseio.com",
-            projectId: "ooontime",
-            storageBucket: "ooontime.firebasestorage.app",
-            messagingSenderId: "155662368029",
-            appId: "1:155662368029:web:1bb027cd8c95fac354b5f4",
-            measurementId: "G-E7GJQYXLWB"
+            apiKey: "AIzaSyCQwn0Uoh0JcseYnTK5l8QQRCAfaxwmMJc",
+            authDomain: "ontimesheet-ee7b7.firebaseapp.com",
+            databaseURL: "https://ontimesheet-ee7b7-default-rtdb.firebaseio.com",
+            projectId: "ontimesheet-ee7b7",
+            storageBucket: "ontimesheet-ee7b7.appspot.com",
+            messagingSenderId: "1035435432373",
+            appId: "1:1035435432373:web:02ad0f7a84e44299c161fc",
+            measurementId: "G-L1CWKPRXQD"
         };
-
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
         let tableData = [];
         let loggedUser = null;
-
-        // دالة لحفظ البيانات في Firebase
-        async function saveToFirebase(data) {
-            try {
-                const newTaskRef = push(ref(database, 'tasks'));
-                await set(newTaskRef, {
-                    ...data,
-                    user: loggedUser,
-                    createdAt: new Date().toISOString()
-                });
-                return true;
-            } catch (error) {
-                console.error("Error saving to Firebase:", error);
-                return false;
-            }
-        }
-
-        // دالة لجلب البيانات من Firebase
-        function syncFromFirebase() {
-            const tasksRef = ref(database, 'tasks');
-            onValue(tasksRef, (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    tableData = Object.keys(data).map(key => ({
-                        id: key,
-                        data: [
-                            data[key].account,
-                            data[key].TaskName,
-                            data[key].From,
-                            data[key].engineer,
-                            data[key].text1,
-                            data[key].text2,
-                            data[key].link1,
-                            data[key].note
-                        ],
-                        date: data[key].date,
-                        user: data[key].user
-                    }));
-                    renderTable();
-                } else {
-                    tableData = [];
-                    renderTable();
-                }
-            });
-        }
-
-        // دالة لحذف البيانات من Firebase
-        async function deleteFromFirebase(taskId) {
-            try {
-                await remove(ref(database, `tasks/${taskId}`));
-                return true;
-            } catch (error) {
-                console.error("Error deleting from Firebase:", error);
-                return false;
-            }
-        }
-
         // دالة لإظهار نافذة تسجيل الدخول
         function showLoginModal() {
             document.getElementById('loginModal').style.display = 'flex';
@@ -558,12 +501,10 @@
             document.getElementById('loginPass').value = '';
             document.getElementById('loginError').style.display = 'none';
         }
-
         // دالة لإخفاء نافذة تسجيل الدخول
         function hideLoginModal() {
             document.getElementById('loginModal').style.display = 'none';
         }
-
         // دالة موحدة للتعامل مع زر الدخول/الخروج
         function handleLoginLogout() {
             if (loggedUser) {
@@ -576,7 +517,6 @@
                 showLoginModal();
             }
         }
-
         // تحديث نص زر الدخول/الخروج
         function updateLoginBtn() {
             const btn = document.getElementById('loginBtn');
@@ -586,7 +526,6 @@
                 btn.textContent = 'Login 🔐';
             }
         }
-
         // دالة تنفيذ تسجيل الدخول
         function doLogin() {
             const user = document.getElementById('loginUser').value.trim();
@@ -602,7 +541,6 @@
                 document.getElementById('loginError').style.display = 'block';
             }
         }
-
         // تحديث خيارات المهندس واسم الموظف حسب المستخدم
         function updateEngineerOptions() {
             const engineerList = document.getElementById('engineer-list');
@@ -652,7 +590,6 @@
                 FromList.innerHTML += '<option value="Zeinab Farouk">';
             }
         }
-
         // إظهار/إخفاء النموذج والأزرار حسب حالة الدخول
         function updateFormVisibility() {
             const formRows = document.querySelectorAll('.form-row, .actions-left');
@@ -681,15 +618,13 @@
             }
             renderTable();
         }
-
         // عند تحميل الصفحة، إخفاء النموذج إذا لم يتم تسجيل الدخول
         window.onload = function() {
             updateFormVisibility();
             updateLoginBtn();
             setCurrentDateTimeToTextFields();
-            syncFromFirebase(); // بدء مزامنة البيانات من Firebase
+            listenForData(); // تفعيل الاستماع للبيانات
         };
-
         // دالة لتعبئة text1 و text2 بتاريخ ووقت الآن
         function setCurrentDateTimeToTextFields() {
             const now = new Date();
@@ -697,7 +632,6 @@
             document.getElementById('text1').value = formatted;
             document.getElementById('text2').value = formatted;
         }
-
         // دالة لمسح جميع الحقول بعد الإضافة أو الإظهار
         function clearInputs() {
             document.getElementById('account').value = '';
@@ -709,55 +643,46 @@
             document.getElementById('link1').value = '';
             document.getElementById('note').value = '';
         }
-
-        // دالة لإضافة البيانات المدخلة إلى الجدول بعد التحقق
-        async function showData() {
+        // دالة لإضافة البيانات المدخلة إلى قاعدة بيانات Firebase
+        function showData() {
             const account = document.getElementById('account').value;
-            const TaskName = document.getElementById('Task Name ').value;
-            const From = document.getElementById('From').value;
+            const TaskName  = document.getElementById('Task Name ').value;
+            const From  = document.getElementById('From').value;
             const engineer = document.getElementById('engineer').value;
             const text1 = document.getElementById('text1').value;
             const text2 = document.getElementById('text2').value;
             const link1 = document.getElementById('link1').value;
             const note = document.getElementById('note').value;
-
-            if (!account || !From || !engineer) {
+            if (!account || !From  || !engineer) {
                 alert('⚠️ Please select Project, From, and Engineer first!');
                 return;
             }
-
             const today = new Date();
             const dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
-
-            const taskData = {
-                account,
-                TaskName,
-                From,
-                engineer,
-                text1,
-                text2,
-                link1,
-                note,
-                date: dateStr
+            const rowObj = {
+                data: [account, TaskName , From, engineer, text1, text2, link1, note],
+                date: dateStr,
+                user: loggedUser
             };
-
-            const success = await saveToFirebase(taskData);
-            if (success) {
-                clearInputs();
-                setCurrentDateTimeToTextFields();
-            } else {
-                alert('Failed to save data to server. Please try again.');
-            }
+            // حفظ البيانات في Firebase
+            database.ref('rows').push(rowObj, function(error) {
+                if (error) {
+                    alert('❌ Error saving data!');
+                } else {
+                    clearInputs();
+                    setCurrentDateTimeToTextFields();
+                }
+            });
         }
-
         // دالة لإعادة رسم الجدول بناءً على البيانات الحالية
         function renderTable() {
             const table = document.getElementById('dataTable');
             const thead = table.querySelector('thead tr');
             const tbody = table.querySelector('tbody');
             tbody.innerHTML = '';
-
+            // تحديث رأس الجدول لإضافة عمود الحذف فقط عند تسجيل الدخول
             if (thead) {
+                // إعادة بناء رأس الجدول
                 thead.innerHTML = `
                     <th>Project</th>
                     <th>Task Name </th>
@@ -771,22 +696,21 @@
                     ${loggedUser ? '<th>Delete</th>' : ''}
                 `;
             }
-
+            // فلترة حسب التاريخ
             const from = document.getElementById('filterFrom').value;
             const to = document.getElementById('filterTo').value;
             let filteredData = tableData;
-
             if (from) {
                 filteredData = filteredData.filter(rowObj => rowObj.date >= from);
             }
             if (to) {
                 filteredData = filteredData.filter(rowObj => rowObj.date <= to);
             }
-
-            filteredData.forEach((rowObj) => {
+            filteredData.forEach((rowObj, idx) => {
                 const tr = document.createElement('tr');
                 rowObj.data.forEach((cell, i) => {
                     const td = document.createElement('td');
+                    // إذا كان text1 أو text2 (index 4 أو 5)
                     if(i === 4 || i === 5) {
                         td.textContent = formatDateTime(cell);
                     } else {
@@ -794,22 +718,23 @@
                     }
                     td.style.textAlign = 'center';
                     td.style.verticalAlign = 'middle';
+                    // إذا كان العمود هو الرابط (العمود السابع index 6)
                     if(i === 6) {
                         td.classList.add('link-cell');
-                        td.title = cell;
+                        td.title = cell; // لعرض الرابط كامل عند الوقوف عليه
                     }
                     tr.appendChild(td);
                 });
-
+                // عمود التاريخ
                 const dateTd = document.createElement('td');
                 dateTd.textContent = rowObj.date;
                 dateTd.style.textAlign = 'center';
                 tr.appendChild(dateTd);
-
+                // عمود الحذف فقط إذا كان المستخدم الحالي هو من أضاف الصف
                 if (loggedUser) {
                     const deleteTd = document.createElement('td');
                     if (rowObj.user === loggedUser) {
-                        deleteTd.innerHTML = `<span style="cursor:pointer;color:#d32f2f;font-size:1.5em;" title="Delete" onclick="deleteRow('${rowObj.id}')">🗑️</span>`;
+                        deleteTd.innerHTML = '<span style="cursor:pointer;color:#d32f2f;font-size:1.5em;" title="Delete" onclick="deleteRow(' + tableData.indexOf(rowObj) + ')">🗑️</span>';
                     } else {
                         deleteTd.innerHTML = '';
                     }
@@ -818,20 +743,25 @@
                 }
                 tbody.appendChild(tr);
             });
-
             table.style.display = filteredData.length ? '' : 'none';
         }
-
-        // دالة حذف صف حسب index
-        async function deleteRow(taskId) {
-            if (confirm('Are you sure you want to delete this row?')) {
-                const success = await deleteFromFirebase(taskId);
-                if (!success) {
-                    alert('Failed to delete from server. Please try again.');
+        // حذف صف من Firebase
+        function deleteRow(idx) {
+            if (typeof idx === 'number' && idx >= 0 && idx < tableData.length) {
+                if (confirm('Are you sure you want to delete this row?')) {
+                    // البحث عن المفتاح في Firebase
+                    database.ref('rows').once('value', function(snapshot) {
+                        let i = 0;
+                        snapshot.forEach(function(child) {
+                            if (i === idx) {
+                                child.ref.remove();
+                            }
+                            i++;
+                        });
+                    });
                 }
             }
         }
-
         // دالة لتحويل datetime-local إلى الشكل المطلوب
         function formatDateTime(dt) {
             if (!dt) return '';
@@ -845,7 +775,6 @@
             const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
             return date.toLocaleString('en-US', options);
         }
-
         // دالة لتصدير البيانات الظاهرة في الجدول إلى ملف إكسل
         function exportToExcel() {
             if (tableData.length === 0) {
@@ -870,6 +799,16 @@
             XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
             XLSX.writeFile(wb, 'time.xlsx');
             clearInputs();
+        }
+        // جلب البيانات من Firebase وتحديث الجدول تلقائياً
+        function listenForData() {
+            database.ref('rows').on('value', function(snapshot) {
+                tableData = [];
+                snapshot.forEach(function(child) {
+                    tableData.push(child.val());
+                });
+                renderTable();
+            });
         }
     </script>
 </body>
