@@ -470,39 +470,24 @@
     <div class="btns" style="display:none;"></div>
     <div class="login-bar" style="display:none;"></div>
     <div class="center-title" style="display:none;" ></div>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-        // --- Firebase config and initialization ---
+        // --- Firebase تهيئة ---
         const firebaseConfig = {
-          apiKey: "AIzaSyCbwByL6V36EU7YCY7_CEH_xRXesmFRr0Q",
-          authDomain: "onotime-a6cf9.firebaseapp.com",
-          projectId: "onotime-a6cf9",
-          storageBucket: "onotime-a6cf9.appspot.com",
-          messagingSenderId: "127048602959",
-          appId: "1:127048602959:web:1e25248d1e63d90c39613a",
-          measurementId: "G-5LRGW4K69J"
+          apiKey: "AIzaSyCQwn0Uoh0JcseYnTK5l8QQRCAfaxwmMJc",
+          authDomain: "ontimesheet-ee7b7.firebaseapp.com",
+          projectId: "ontimesheet-ee7b7",
+          storageBucket: "ontimesheet-ee7b7.appspot.com",
+          messagingSenderId: "1035435432373",
+          appId: "1:1035435432373:web:02ad0f7a84e44299c161fc",
+          measurementId: "G-L1CWKPRXQD"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        db.enablePersistence().catch(function(err) {});
-        // --- END Firebase config ---
-
-        // tableData يتم تعبئته فقط من Firestore
         let tableData = [];
         let loggedUser = null;
-        // الاستماع للتغييرات في Firestore فقط
-        db.collection("tasks").orderBy("timestamp")
-          .onSnapshot((snapshot) => {
-            tableData = [];
-            snapshot.forEach(doc => {
-                let rowObj = doc.data();
-                rowObj.id = doc.id; // حفظ id الوثيقة للحذف
-                tableData.push(rowObj);
-            });
-            renderTable();
-        });
         // دالة لإظهار نافذة تسجيل الدخول
         function showLoginModal() {
             document.getElementById('loginModal').style.display = 'flex';
@@ -668,15 +653,26 @@
             const row = [account, TaskName , From, engineer, text1, text2, link1, note];
             const today = new Date();
             const dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
-            db.collection("tasks").add({
-                data: row,
-                date: dateStr,
-                user: loggedUser,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                clearInputs();
-                setCurrentDateTimeToTextFields();
-            });
+            // تحقق من التكرار في Firestore
+            db.collection("tasks")
+              .where("data", "==", row)
+              .get()
+              .then((querySnapshot) => {
+                if (!querySnapshot.empty) {
+                  alert('ℹ️ This row already exists in the table!');
+                  return;
+                }
+                // أضف إلى Firestore
+                db.collection("tasks").add({
+                    data: row,
+                    date: dateStr,
+                    user: loggedUser,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => {
+                    clearInputs();
+                    setCurrentDateTimeToTextFields();
+                });
+              });
         }
         // دالة لإعادة رسم الجدول بناءً على البيانات الحالية
         function renderTable() {
@@ -753,8 +749,8 @@
         function deleteRow(idx) {
             if (typeof idx === 'number' && idx >= 0 && idx < tableData.length) {
                 if (confirm('Are you sure you want to delete this row?')) {
-                    const docId = tableData[idx].id;
-                    db.collection("tasks").doc(docId).delete();
+                    const id = tableData[idx].id;
+                    db.collection("tasks").doc(id).delete();
                 }
             }
         }
