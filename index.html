@@ -470,11 +470,11 @@
     <div class="btns" style="display:none;"></div>
     <div class="login-bar" style="display:none;"></div>
     <div class="center-title" style="display:none;" ></div>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-        // --- Firebase تهيئة ---
+        // --- Firebase Initialization ---
         const firebaseConfig = {
           apiKey: "AIzaSyCQwn0Uoh0JcseYnTK5l8QQRCAfaxwmMJc",
           authDomain: "ontimesheet-ee7b7.firebaseapp.com",
@@ -485,7 +485,9 @@
           measurementId: "G-L1CWKPRXQD"
         };
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        const db = firebase.database();
+        // --- End Firebase Initialization ---
+        
         let tableData = [];
         let loggedUser = null;
         // دالة لإظهار نافذة تسجيل الدخول
@@ -612,11 +614,12 @@
             }
             renderTable();
         }
-        // عند تحميل الصفحة، إخفاء النموذج إذا لم يتم تسجيل الدخول
+        // تحميل البيانات عند بدء التشغيل
         window.onload = function() {
             updateFormVisibility();
             updateLoginBtn();
             setCurrentDateTimeToTextFields();
+            loadClients(); // تحميل البيانات من Firebase
         };
         // دالة لتعبئة text1 و text2 بتاريخ ووقت الآن
         function setCurrentDateTimeToTextFields() {
@@ -650,29 +653,25 @@
                 alert('⚠️ Please select Project, From, and Engineer first!');
                 return;
             }
-            const row = [account, TaskName , From, engineer, text1, text2, link1, note];
             const today = new Date();
             const dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
-            // تحقق من التكرار في Firestore
-            db.collection("tasks")
-              .where("data", "==", row)
-              .get()
-              .then((querySnapshot) => {
-                if (!querySnapshot.empty) {
-                  alert('ℹ️ This row already exists in the table!');
-                  return;
+            const rowObj = {data: [account, TaskName , From, engineer, text1, text2, link1, note], date: dateStr, user: loggedUser};
+            // تحقق من التكرار في قاعدة البيانات
+            let isDuplicate = false;
+            for (let i = 0; i < tableData.length; i++) {
+                if (JSON.stringify(tableData[i].data) === JSON.stringify(rowObj.data)) {
+                    isDuplicate = true;
+                    break;
                 }
-                // أضف إلى Firestore
-                db.collection("tasks").add({
-                    data: row,
-                    date: dateStr,
-                    user: loggedUser,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                }).then(() => {
-                    clearInputs();
-                    setCurrentDateTimeToTextFields();
-                });
-              });
+            }
+            if (isDuplicate) {
+                alert('ℹ️ This row already exists in the table!');
+                return;
+            }
+            // حفظ في Firebase
+            db.ref('tasks').push(rowObj);
+            clearInputs();
+            setCurrentDateTimeToTextFields();
         }
         // دالة لإعادة رسم الجدول بناءً على البيانات الحالية
         function renderTable() {
@@ -745,12 +744,26 @@
             });
             table.style.display = filteredData.length ? '' : 'none';
         }
-        // دالة حذف صف حسب index
+        // دالة جلب البيانات من Firebase وتحديث الجدول لحظيًا
+        function loadClients() {
+            db.ref('tasks').on('value', (snapshot) => {
+                tableData = [];
+                snapshot.forEach(child => {
+                    const val = child.val();
+                    val._key = child.key; // حفظ المفتاح للحذف
+                    tableData.push(val);
+                });
+                renderTable();
+            });
+        }
+        // دالة حذف صف حسب index (من Firebase)
         function deleteRow(idx) {
             if (typeof idx === 'number' && idx >= 0 && idx < tableData.length) {
                 if (confirm('Are you sure you want to delete this row?')) {
-                    const id = tableData[idx].id;
-                    db.collection("tasks").doc(id).delete();
+                    const key = tableData[idx]._key;
+                    if (key) {
+                        db.ref('tasks/' + key).remove();
+                    }
                 }
             }
         }
