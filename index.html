@@ -319,6 +319,10 @@
             cursor: pointer;
         }
     </style>
+    <!-- Firebase App (core) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <!-- Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <div class="header-bar">
@@ -437,7 +441,7 @@
             </div>
             <div class="actions-bar">
                 <div class="actions-left" id="actionsLeft">
-                    <button type="button" onclick="showData()" class="main-btn">Add 📝</button>
+                    <button type="button" onclick="saveData()" class="main-btn">Add 📝</button>
                     <button type="button" onclick="exportToExcel()" class="main-btn" id="exportBtnLeft">Export 📤</button>
                 </div>
                 <div class="actions-right" id="actionsRight">
@@ -471,28 +475,9 @@
     <div class="login-bar" style="display:none;"></div>
     <div class="center-title" style="display:none;" ></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
     <script>
-        // Firebase config
-        const firebaseConfig = {
-            apiKey: "AIzaSyCQwn0Uoh0JcseYnTK5l8QQRCAfaxwmMJc",
-            authDomain: "ontimesheet-ee7b7.firebaseapp.com",
-            projectId: "ontimesheet-ee7b7",
-            storageBucket: "ontimesheet-ee7b7.appspot.com",
-            messagingSenderId: "1035435432373",
-            appId: "1:1035435432373:web:02ad0f7a84e44299c161fc",
-            measurementId: "G-L1CWKPRXQD"
-        };
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        firebase.analytics();
-        const db = firebase.firestore();
         let tableData = [];
         let loggedUser = null;
-        let unsubscribe = null; // for Firestore listener
         // دالة لإظهار نافذة تسجيل الدخول
         function showLoginModal() {
             document.getElementById('loginModal').style.display = 'flex';
@@ -622,7 +607,7 @@
             updateFormVisibility();
             updateLoginBtn();
             setCurrentDateTimeToTextFields();
-            syncDataRealtime();
+            loadData(); // تحميل البيانات من Firestore
         };
         // دالة لتعبئة text1 و text2 بتاريخ ووقت الآن
         function setCurrentDateTimeToTextFields() {
@@ -642,41 +627,8 @@
             document.getElementById('link1').value = '';
             document.getElementById('note').value = '';
         }
-        // دالة لحفظ البيانات في Firestore
-        function saveData(rowObj) {
-            db.collection('tasks').add(rowObj)
-                .then(() => {
-                    // تم الحفظ بنجاح
-                })
-                .catch((error) => {
-                    alert('Error saving data: ' + error.message);
-                });
-        }
-        // دالة لجلب البيانات من Firestore (مرة واحدة)
-        function loadClients() {
-            db.collection('tasks').get().then((querySnapshot) => {
-                tableData = [];
-                querySnapshot.forEach((doc) => {
-                    tableData.push(doc.data());
-                });
-                renderTable();
-            });
-        }
-        // دالة لمزامنة البيانات لحظياً
-        function syncDataRealtime() {
-            if (unsubscribe) unsubscribe();
-            unsubscribe = db.collection('tasks').onSnapshot((snapshot) => {
-                tableData = [];
-                snapshot.forEach((doc) => {
-                    let data = doc.data();
-                    data._id = doc.id;
-                    tableData.push(data);
-                });
-                renderTable();
-            });
-        }
-        // تعديل showData ليحفظ في Firestore
-        function showData() {
+        // دالة لإضافة البيانات المدخلة إلى الجدول بعد التحقق
+        function saveData() {
             const account = document.getElementById('account').value;
             const TaskName  = document.getElementById('Task Name ').value;
             const From  = document.getElementById('From').value;
@@ -685,24 +637,23 @@
             const text2 = document.getElementById('text2').value;
             const link1 = document.getElementById('link1').value;
             const note = document.getElementById('note').value;
+            const today = new Date();
+            const dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+            const user = loggedUser;
+
             if (!account || !From  || !engineer) {
                 alert('⚠️ Please select Project, From, and Engineer first!');
                 return;
             }
-            const row = [account, TaskName , From, engineer, text1, text2, link1, note];
-            // تحقق من التكرار في السحابة
-            if (tableData.some(r => JSON.stringify(r.data) === JSON.stringify(row))) {
-                alert('ℹ️ This row already exists in the table!');
-                return;
-            }
-            const today = new Date();
-            const dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
-            const rowObj = {data: row, date: dateStr, user: loggedUser};
-            saveData(rowObj);
-            clearInputs();
-            setCurrentDateTimeToTextFields();
+
+            db.collection("tasks").add({
+                account, TaskName, From, engineer, text1, text2, link1, note, date: dateStr, user
+            }).then(() => {
+                clearInputs();
+                setCurrentDateTimeToTextFields();
+            });
         }
-        // تعديل renderTable ليستخدم tableData من السحابة
+        // دالة لإعادة رسم الجدول بناءً على البيانات الحالية
         function renderTable() {
             const table = document.getElementById('dataTable');
             const thead = table.querySelector('thead tr');
@@ -719,28 +670,13 @@
                     <th>Link</th>
                     <th>Note</th>
                     <th>Date</th>
-                    ${loggedUser ? '<th>Delete</th>' : ''}
                 `;
             }
-            // فلترة حسب التاريخ
-            const from = document.getElementById('filterFrom').value;
-            const to = document.getElementById('filterTo').value;
-            let filteredData = tableData;
-            if (from) {
-                filteredData = filteredData.filter(rowObj => rowObj.date >= from);
-            }
-            if (to) {
-                filteredData = filteredData.filter(rowObj => rowObj.date <= to);
-            }
-            filteredData.forEach((rowObj, idx) => {
+            tableData.forEach((rowObj, idx) => {
                 const tr = document.createElement('tr');
                 rowObj.data.forEach((cell, i) => {
                     const td = document.createElement('td');
-                    if(i === 4 || i === 5) {
-                        td.textContent = formatDateTime(cell);
-                    } else {
-                        td.textContent = cell;
-                    }
+                    td.textContent = cell;
                     td.style.textAlign = 'center';
                     td.style.verticalAlign = 'middle';
                     if(i === 6) {
@@ -753,24 +689,17 @@
                 dateTd.textContent = rowObj.date;
                 dateTd.style.textAlign = 'center';
                 tr.appendChild(dateTd);
-                if (loggedUser) {
-                    const deleteTd = document.createElement('td');
-                    if (rowObj.user === loggedUser) {
-                        deleteTd.innerHTML = `<span style="cursor:pointer;color:#d32f2f;font-size:1.5em;" title="Delete" onclick="deleteRowFirestore('${rowObj._id}')">🗑️</span>`;
-                    } else {
-                        deleteTd.innerHTML = '';
-                    }
-                    deleteTd.style.textAlign = 'center';
-                    tr.appendChild(deleteTd);
-                }
                 tbody.appendChild(tr);
             });
-            table.style.display = filteredData.length ? '' : 'none';
+            table.style.display = tableData.length ? '' : 'none';
         }
-        // حذف صف من Firestore
-        function deleteRowFirestore(id) {
-            if (id && confirm('Are you sure you want to delete this row?')) {
-                db.collection('tasks').doc(id).delete();
+        // دالة حذف صف حسب index
+        function deleteRow(idx) {
+            if (typeof idx === 'number' && idx >= 0 && idx < tableData.length) {
+                if (confirm('Are you sure you want to delete this row?')) {
+                    tableData.splice(idx, 1);
+                    renderTable();
+                }
             }
         }
         // دالة لتحويل datetime-local إلى الشكل المطلوب
@@ -810,6 +739,41 @@
             XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
             XLSX.writeFile(wb, 'time.xlsx');
             clearInputs();
+        }
+        // Firebase config (ضع كودك هنا)
+        const firebaseConfig = {
+          apiKey: "AIzaSyCQwn0Uoh0JcseYnTK5l8QQRCAfaxwmMJc",
+          authDomain: "ontimesheet-ee7b7.firebaseapp.com",
+          projectId: "ontimesheet-ee7b7",
+          storageBucket: "ontimesheet-ee7b7.firebasestorage.app",
+          messagingSenderId: "1035435432373",
+          appId: "1:1035435432373:web:02ad0f7a84e44299c161fc",
+          measurementId: "G-L1CWKPRXQD"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        function loadData() {
+            db.collection("tasks").orderBy("date", "desc").onSnapshot((querySnapshot) => {
+                tableData = [];
+                querySnapshot.forEach((doc) => {
+                    const d = doc.data();
+                    tableData.push({
+                        id: doc.id,
+                        data: [
+                            d.account, d.TaskName, d.From, d.engineer,
+                            d.text1, d.text2, d.link1, d.note
+                        ],
+                        date: d.date,
+                        user: d.user
+                    });
+                });
+                renderTable();
+            });
+        }
+        function deleteRowFirestore(id) {
+            if (confirm('Are you sure you want to delete this row?')) {
+                db.collection("tasks").doc(id).delete();
+            }
         }
     </script>
 </body>
