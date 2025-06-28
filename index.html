@@ -2,8 +2,9 @@
 <html lang="ar" dir="ltr">
 <head>
     <meta charset="UTF-8">
-<title> On Time Sheet </title>
-    <link rel="icon" type="image/png" href="image1.png">    <style>
+    <title> On Time Sheet </title>
+    <link rel="icon" type="image/png" href="image1.png">
+    <style>
         body {
             font-family: 'Cairo', Arial, sans-serif;
             background: linear-gradient(120deg, #cfdef3 0%, #cfdef3 100%);
@@ -444,6 +445,8 @@
                 <div class="actions-left" id="actionsLeft">
                     <button type="button" onclick="showData()" class="main-btn">Add 📝</button>
                     <button type="button" onclick="exportToExcel()" class="main-btn" id="exportBtnLeft">Export 📤</button>
+                    <button type="button" onclick="document.getElementById('importInput').click();" class="main-btn" id="importBtnLeft" style="display:none;">Import 📥</button>
+                    <input type="file" id="importInput" accept=".xlsx,.xls" style="display:none;" onchange="importFromExcel(event)">
                 </div>
                 <div class="actions-right" id="actionsRight">
                     <label for="filterFrom" style="font-weight:600; margin-left: 120px;">From: <input type="date" id="filterFrom" class="date-input" style="margin-top: 10px;"></label>
@@ -598,6 +601,7 @@
             const actionsRight = document.getElementById('actionsRight');
             const exportBtnLeft = document.getElementById('exportBtnLeft');
             const exportBtnRight = document.getElementById('exportBtnRight');
+            const importBtnLeft = document.getElementById('importBtnLeft');
             const dataTable = document.getElementById('dataTable');
             if (loggedUser) {
                 formRows.forEach(e => e.style.display = 'flex');
@@ -606,6 +610,7 @@
                 if(actionsRight) actionsRight.style.display = 'flex';
                 if(exportBtnLeft) exportBtnLeft.style.display = 'inline-block';
                 if(exportBtnRight) exportBtnRight.style.display = 'none';
+                if(importBtnLeft) importBtnLeft.style.display = 'inline-block';
                 if(dataTable) dataTable.style.display = tableData.length ? '' : 'none';
             } else {
                 formRows.forEach(e => e.style.display = 'none');
@@ -614,6 +619,7 @@
                 if(actionsRight) actionsRight.style.display = 'flex';
                 if(exportBtnLeft) exportBtnLeft.style.display = 'none';
                 if(exportBtnRight) exportBtnRight.style.display = 'inline-block';
+                if(importBtnLeft) importBtnLeft.style.display = 'none';
                 if(dataTable) dataTable.style.display = tableData.length ? '' : 'none';
             }
             renderTable();
@@ -777,13 +783,23 @@
         }
         // دالة لتصدير البيانات الظاهرة في الجدول إلى ملف إكسل
         function exportToExcel() {
-            if (tableData.length === 0) {
+            // استخدم نفس منطق الفلترة كما في renderTable
+            const from = document.getElementById('filterFrom').value;
+            const to = document.getElementById('filterTo').value;
+            let filteredData = tableData;
+            if (from) {
+                filteredData = filteredData.filter(rowObj => rowObj.date >= from);
+            }
+            if (to) {
+                filteredData = filteredData.filter(rowObj => rowObj.date <= to);
+            }
+            if (filteredData.length === 0) {
                 alert('⚠️ Please enter data first by clicking Show 👁️');
                 return;
             }
             const ws = XLSX.utils.aoa_to_sheet([
                 ['Project 🏦','Task Name  📝','From  👤','Engineer 💻','Sent Date + Time  📆','Reply  Date + Time   📆','Link 🔗','Note 🗒️'],
-                ...tableData.map(rowObj => rowObj.data)
+                ...filteredData.map(rowObj => rowObj.data)
             ]);
             // Center align all cells
             const range = XLSX.utils.decode_range(ws['!ref']);
@@ -809,6 +825,34 @@
                 });
                 renderTable();
             });
+        }
+        function importFromExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const sheetName = workbook.SheetNames[0];
+                const sheet = workbook.Sheets[sheetName];
+                const rows = XLSX.utils.sheet_to_json(sheet, {header:1});
+                // توقع أن أول صف هو العناوين
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (!row || row.length < 8) continue; // تجاهل الصفوف الناقصة
+                    const today = new Date();
+                    const dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+                    const rowObj = {
+                        data: [row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]],
+                        date: dateStr,
+                        user: loggedUser
+                    };
+                    database.ref('rows').push(rowObj);
+                }
+                alert('✅ Data imported successfully!');
+                event.target.value = '';
+            };
+            reader.readAsArrayBuffer(file);
         }
     </script>
 </body>
