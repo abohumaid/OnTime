@@ -779,7 +779,7 @@
             }
             if (isNaN(date.getTime())) return dt;
             const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
-            return date.toLocaleString('en-US', options);
+            return date.toLocaleString('en-US', options).replace(' at ', ' ');
         }
         // دالة لتصدير البيانات الظاهرة في الجدول إلى ملف إكسل
         function exportToExcel() {
