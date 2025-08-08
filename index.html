@@ -67,99 +67,23 @@
             background: #fff;
             transition: border 0.2s;
         }
-        select:focus, input[type="text"]:focus, input[list]:focus {
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background: #fff url('data:image/svg+xml;utf8,<svg fill="%23333" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 12px center/18px 18px;
+            box-shadow: 0 2px 8px rgba(100,100,200,0.07);
+            padding-right: 38px;
+            cursor: pointer;
+        }
+        select:focus {
             border: 1.5px solid #1976d2;
             outline: none;
+            background-color: #f0f7ff;
         }
-        .btns {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 10px;
-        }
-        button {
-            padding: 13px 38px;
-            border: none;
-            border-radius: 8px;
-            background: linear-gradient(90deg, #1976d2 0%, #64b5f6 100%);
-            color: #fff;
-            font-size: 1.15em;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(25,118,210,0.10);
-            transition: background 0.2s, transform 0.1s;
-        }
-        button:hover {
-            background: linear-gradient(90deg, #1565c0 0%, #42a5f5 100%);
-            transform: translateY(-2px) scale(1.03);
-        }
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin-top: 10px;
-            background: #fff;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 4px 24px rgba(30,136,229,0.07);
-        }
-        th, td {
-            border-bottom: 1.5px solid #e3eafc;
-            padding: 18px 10px;
-            text-align: center;
-            vertical-align: middle;
-        }
-        td {
-            font-size: 0.85em;
-             /* خط بيانات الجدول  */
-        }
-        th {
-            background: linear-gradient(90deg, #1976d2 0%, #64b5f6 100%);
-            color: #fff;
-            font-size: 1.13em;
-            font-weight: bold;
-            letter-spacing: 1px;
-            border: none;
-        }
-        tr:last-child td {
-            border-bottom: none;
-        }
-        tbody tr:nth-child(even) {
-            background: #dbeafe;
-        }
-        tbody tr:nth-child(odd) {
-            background: #f7fafc;
-        }
-        tbody tr:hover {
-            background: #d1eaff;
-            transition: background 0.2s;
-        }
-        td {
-            border: none;
-            border-right: 1px solid #e3eafc;
-        }
-        td:last-child {
-            border-right: none;
-        }
-        @media (max-width: 900px) {
-            .form-row {
-                flex-direction: column;
-                gap: 12px;
-            }
-            .form-group {
-                min-width: 100%;
-            }
-        }
-        .move-right {
-            margin-right: 40px;
-        }
-        @media (max-width: 900px) {
-            .move-right {
-                margin-right: 0;
-            }
-        }
-        .large-input label {
+        .large-input select {
             font-size: 1.25em;
+            padding: 16px 12px 16px 12px;
         }
         .large-input input[list], .large-input input[type="text"] {
             font-size: 1.25em;
@@ -179,7 +103,7 @@
             max-width: 1000px;
             margin: 8px auto 0 auto;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
             flex-wrap: wrap;
             gap: 6px;
@@ -187,11 +111,17 @@
         .actions-left {
             display: flex;
             gap: 16px;
+            justify-content: center;
+            width: 50%;
+            margin: 0 auto;
         }
         .actions-right {
             display: flex;
             gap: 12px;
             align-items: center;
+            justify-content: center;
+            width: 50%;
+            margin: 0 auto;
         }
         .main-btn {
             padding: 7px 18px;
@@ -203,9 +133,15 @@
             box-shadow: 0 2px 8px rgba(25,118,210,0.10);
             border: none;
             cursor: pointer;
+            margin: 0 5px;
+            min-width: 100px;
         }
         .main-btn:hover {
             background: linear-gradient(90deg,#1565c0 0%,#42a5f5 100%);
+        }
+        
+        #deleteAllBtn:hover {
+            background: linear-gradient(90deg,#c62828 0%,#ef5350 100%) !important;
         }
         .date-input {
             padding: 8px 10px;
@@ -318,6 +254,86 @@
             text-align: left;
             cursor: pointer;
         }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 10px;
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(30,136,229,0.07);
+        }
+        th, td {
+            border-bottom: 1.5px solid #e3eafc;
+            padding: 18px 10px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        th {
+            background: linear-gradient(90deg, #1976d2 0%, #64b5f6 100%);
+            color: #fff;
+            font-size: 1.13em;
+            font-weight: bold;
+            letter-spacing: 1px;
+            border: none;
+        }
+        td {
+            font-size: 0.98em;
+            border: none;
+            border-right: 1px solid #e3eafc;
+            background: #fff;
+            transition: background 0.2s;
+        }
+        td:last-child {
+            border-right: none;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tbody tr:nth-child(even) {
+            background: #f5f7fa;
+        }
+        tbody tr:nth-child(odd) {
+            background: #e3f0fc;
+        }
+        tbody tr:hover {
+            background: #d1eaff;
+            transition: background 0.2s;
+        }
+        @media (max-width: 900px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+            thead tr {
+                display: none;
+            }
+            tr {
+                margin-bottom: 18px;
+                box-shadow: 0 2px 8px rgba(30,136,229,0.07);
+                border-radius: 12px;
+                background: #fff;
+                padding: 8px 0;
+            }
+            td {
+                border: none;
+                border-bottom: 1px solid #e3eafc;
+                position: relative;
+                padding-left: 50%;
+                text-align: right;
+                min-height: 38px;
+            }
+            td:before {
+                position: absolute;
+                top: 50%;
+                left: 16px;
+                transform: translateY(-50%);
+                white-space: nowrap;
+                font-weight: bold;
+                color: #1976d2;
+                content: attr(data-label);
+            }
+        }
     </style>
     <!-- Firebase App (the core Firebase SDK) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -350,102 +366,61 @@
         <form id="mainForm" onsubmit="return false;">
             <div class="form-row">
                 <div class="form-group large-input">
-                    <label for="account">Project 🏦</label>
-                    <input list="account-list" id="account" required>
-                    <datalist id="account-list">
-                        <option value="B-Tech">
-                        <option value="Crave">
-                        <option value="Electroulx Complaint">
-                        <option value="Electroulx Digital">
-                        <option value="Electroulx Maintenance">
-                        <option value="Electroulx Outbound">
-                        <option value="Electroulx Sales">
-                        <option value="Fiat">
-                        <option value="Haier">
-                        <option value="Home Center">
-                        <option value="Interface">
-                        <option value="Kansas">
-                        <option value="Minlo Maintenance">
-                        <option value="Minlo Sales">
-                        <option value="Wasla-In">
-                        <option value="Work Force">
-                    </datalist>
+                    <label for="task">Task</label>
+                    <input type="text" id="task" required>
                 </div>
                 <div class="form-group large-input">
-                    <label for="Task Name ">Task Name  📝</label>
-                    <input type="text" id="Task Name " required>
+                    <label for="type">Type</label>
+                    <select id="type" required>
+                        <option value="Updata">Updata</option>
+                        <option value="Updata & Design">Updata & Design</option>
+                        <option value="Development">Development</option>
+                    </select>
                 </div>
                 <div class="form-group large-input">
-                    <label for="From">From  👤</label>
-                    <input list="From-list" id="From" required>
-                    <datalist id="From-list">
-                        <option value="Abd El-Rehem Mohamed">
-                        <option value="Ahmed Mohamed Anwar">
-                        <option value="Alaa Ashour">
-                        <option value="Amir Afifi">
-                        <option value="Asmaa Essam">
-                        <option value="Aya Tarek">
-                        <option value="Ayman Gouda">
-                        <option value="Donia Fathy Eid">
-                        <option value="Ehab Ibarhim">
-                        <option value="Eman Hasaan Awad">
-                        <option value="Habiba Mohamed">
-                        <option value="Habiba Waleed">
-                        <option value="Hanem Mohsen Sayed">
-                        <option value="Hanan Ahmed">
-                        <option value="Heba Elsayed">
-                        <option value="Hossam Farouk">
-                        <option value="Ismail Mostafa">
-                        <option value="Kareem Mohammed">
-                        <option value="Mohamed Sabbah">
-                        <option value="Mohamed Yhia Hamed">
-                        <option value="Mostafa Ahmed Mostafa">
-                        <option value="Nada Mostafa">
-                        <option value="Nermeen Fayek">
-                        <option value="Nesma Mostafa">
-                        <option value="Nour Ahmed">
-                        <option value="Rana Mokhtar">
-                        <option value="Salma Mohamed">
-                        <option value="Samar Musa Barakat">
-                        <option value="Shaimaa Zaky">
-                        <option value="Walid Elzeni">
-                        <option value="Work Force">
-                        <option value="Zeinab Farouk">
-                    </datalist>
+                    <label for="start_time">Start Time</label>
+                    <input type="text" id="start_time" required>
                 </div>
                 <div class="form-group large-input">
-                    <label for="engineer">Engineer 💻</label>
-                    <input list="engineer-list" id="engineer" required>
-                    <datalist id="engineer-list">
-                        <option value="Eng-Ahmed">
-                        <option value="Eng-Mohamed">
-                        <option value="Eng-Ahmed & Eng-Mohamed">
-                    </datalist>
+                    <label for="end_time">End Time</label>
+                    <input type="text" id="end_time" required>
                 </div>
             </div>
             <div class="form-row">
-                <div class="form-group same-width-input">
-                    <label for="text1">Sent Date + Time 📆</label>
-                    <input type="text" id="text1" required>
+                <div class="form-group large-input">
+                    <label for="deadline">Deadline</label>
+                    <input type="text" id="deadline" required>
                 </div>
-                <div class="form-group same-width-input">
-                    <label for="text2">Reply  Date + Time  📆</label>
-                    <input type="text" id="text2" required class="move-right">
+                <div class="form-group large-input">
+                    <label for="status">Status</label>
+                    <select id="status" required>
+                        <option value="Done">Done</option>
+                        <option value="Pending">Pending</option>
+                    </select>
                 </div>
-                <div class="form-group same-width-link-note">
-                    <label for="link1">Link 🔗</label>
-                    <input type="text" id="link1" placeholder="https://..." required>
+                <div class="form-group large-input">
+                    <label for="justification">Justification</label>
+                    <select id="justification" required onchange="replaceJustificationWithInput()">
+                        <option value="Excellent">Excellent</option>
+                        <option value="Other">Other</option>
+                    </select>
                 </div>
-                <div class="form-group same-width-link-note">
-                    <label for="note">Note 🗒️</label>
-                    <input type="text" id="note" class="move-right">
+                <div class="form-group large-input">
+                    <label for="accuracy">Accuracy</label>
+                    <input type="text" id="accuracy" required>
                 </div>
+            </div>
+            <div style="display:none">
+                <datalist id="engineer-list"></datalist>
+                <datalist id="From-list"></datalist>
             </div>
             <div class="actions-bar">
                 <div class="actions-left" id="actionsLeft">
                     <button type="button" onclick="showData()" class="main-btn">Add 📝</button>
                     <button type="button" onclick="exportToExcel()" class="main-btn" id="exportBtnLeft">Export 📤</button>
                     <button type="button" onclick="document.getElementById('importInput').click();" class="main-btn" id="importBtnLeft" style="display:none;">Import 📥</button>
+                    <button type="button" onclick="toggleEditMode()" class="main-btn" id="editBtn" style="display:none;">Edit ✏️</button>
+                    <button type="button" onclick="deleteAllData()" class="main-btn" id="deleteAllBtn" style="display:none;background-color:#d32f2f;">Delete All 🗑️</button>
                     <input type="file" id="importInput" accept=".xlsx,.xls" style="display:none;" onchange="importFromExcel(event)">
                 </div>
                 <div class="actions-right" id="actionsRight">
@@ -460,14 +435,14 @@
         <table id="dataTable" style="display:none;">
             <thead>
                 <tr>
-                    <th>Project</th>
-                    <th>Task Name </th>
-                    <th>From</th>
-                    <th>Engineer</th>
-                    <th>Sent Date + Time  </th>
-                    <th>Reply  Date + Time  </th>
-                    <th>Link</th>
-                    <th>Note</th>
+                    <th>Task</th>
+                    <th>Type</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Deadline</th>
+                    <th>Status</th>
+                    <th>Justification</th>
+                    <th>Accuracy</th>
                     <th>Date</th>
                 </tr>
             </thead>
@@ -497,6 +472,138 @@
 
         let tableData = [];
         let loggedUser = null;
+        let isEditMode = false;
+        
+        function toggleEditMode() {
+            const editBtn = document.getElementById('editBtn');
+            const table = document.querySelector('table');
+            
+            if (!isEditMode) {
+                // تفعيل وضع التعديل
+                isEditMode = true;
+                editBtn.textContent = 'Save 💾';
+                editBtn.className = 'main-btn';
+                editBtn.style.backgroundColor = '#28a745';
+                
+                // إخفاء زر Delete All أثناء التعديل
+                const deleteAllBtn = document.getElementById('deleteAllBtn');
+                if (deleteAllBtn) deleteAllBtn.style.display = 'none';
+                
+                // جعل جميع الخلايا قابلة للتعديل ما عدا Date و Delete
+                const cells = table.querySelectorAll('td:not(:nth-last-child(1)):not(:nth-last-child(2))'); // استثناء عمود Date و Delete
+                cells.forEach(cell => {
+                    const originalText = cell.textContent.trim();
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = originalText;
+                    input.style.cssText = 'width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;';
+                    cell.textContent = '';
+                    cell.appendChild(input);
+                });
+            } else {
+                // حفظ التعديلات
+                isEditMode = false;
+                editBtn.textContent = 'Edit ✏️';
+                editBtn.className = 'main-btn';
+                editBtn.style.backgroundColor = '';
+                
+                // إعادة ظهور زر Delete All بعد الحفظ
+                const deleteAllBtn = document.getElementById('deleteAllBtn');
+                if (deleteAllBtn) deleteAllBtn.style.display = 'inline-block';
+                
+                // جمع البيانات المعدلة وحفظها
+                const rows = table.querySelectorAll('tbody tr');
+                const updatedData = [];
+                
+                rows.forEach((row, index) => {
+                    const inputs = row.querySelectorAll('input');
+                    if (inputs.length > 0) {
+                        // الحصول على التاريخ من الخلية الأصلية (غير قابلة للتعديل)
+                        const dateCell = row.querySelector('td:nth-last-child(2)');
+                        const originalDate = dateCell ? dateCell.textContent.trim() : '';
+                        
+                        const rowData = {
+                            task: inputs[0].value.trim(),
+                            type: inputs[1].value.trim(),
+                            start_time: inputs[2].value.trim(),
+                            end_time: inputs[3].value.trim(),
+                            deadline: inputs[4].value.trim(),
+                            status: inputs[5].value.trim(),
+                            justification: inputs[6].value.trim(),
+                            accuracy: inputs[7].value.trim(),
+                            date: originalDate // استخدام التاريخ الأصلي
+                        };
+                        updatedData.push(rowData);
+                        console.log('Row ' + index + ' data:', rowData);
+                    }
+                });
+                
+                console.log('Total updated rows:', updatedData.length);
+                
+                // حفظ البيانات في Firebase
+                if (updatedData.length > 0) {
+                    saveUpdatedData(updatedData);
+                } else {
+                    alert('No data to save!');
+                }
+                
+                // إعادة عرض الجدول بالشكل العادي
+                renderTable();
+            }
+        }
+        
+        function saveUpdatedData(updatedData) {
+            console.log('Starting to save updated data...');
+            
+            // حذف البيانات القديمة
+            const dbRef = database.ref('tasks');
+            dbRef.remove().then(() => {
+                console.log('Old data removed successfully');
+                
+                // إضافة البيانات الجديدة
+                const promises = updatedData.map(data => {
+                    return dbRef.push(data);
+                });
+                
+                Promise.all(promises).then(() => {
+                    console.log('All data saved successfully');
+                    alert('Data updated successfully!');
+                    // تحديث tableData المحلي
+                    tableData = updatedData;
+                }).catch(error => {
+                    console.error('Error saving new data:', error);
+                    alert('Error saving data. Please try again.');
+                });
+            }).catch(error => {
+                console.error('Error removing old data:', error);
+                alert('Error updating data. Please try again.');
+            });
+        }
+        
+        // دالة لحذف جميع البيانات
+        function deleteAllData() {
+            if (confirm('⚠️ Are you sure you want to delete ALL data? This action cannot be undone!')) {
+                // حذف البيانات من Firebase
+                const tasksRef = database.ref('tasks');
+                const rowsRef = database.ref('rows');
+                
+                Promise.all([
+                    tasksRef.remove(),
+                    rowsRef.remove()
+                ]).then(() => {
+                    console.log('All data deleted successfully');
+                    alert('✅ All data has been deleted successfully!');
+                    // تفعيل وضع التعديل إذا كان مفعلاً
+                    if (isEditMode) {
+                        toggleEditMode();
+                    }
+                }).catch(error => {
+                    console.error('Error deleting data:', error);
+                    alert('❌ Error deleting data. Please try again.');
+                });
+            }
+        }
+        
         // دالة لإظهار نافذة تسجيل الدخول
         function showLoginModal() {
             document.getElementById('loginModal').style.display = 'flex';
@@ -602,6 +709,8 @@
             const exportBtnLeft = document.getElementById('exportBtnLeft');
             const exportBtnRight = document.getElementById('exportBtnRight');
             const importBtnLeft = document.getElementById('importBtnLeft');
+            const editBtn = document.getElementById('editBtn');
+            const deleteAllBtn = document.getElementById('deleteAllBtn');
             const dataTable = document.getElementById('dataTable');
             if (loggedUser) {
                 formRows.forEach(e => e.style.display = 'flex');
@@ -611,6 +720,8 @@
                 if(exportBtnLeft) exportBtnLeft.style.display = 'inline-block';
                 if(exportBtnRight) exportBtnRight.style.display = 'none';
                 if(importBtnLeft) importBtnLeft.style.display = 'inline-block';
+                if(editBtn) editBtn.style.display = 'inline-block';
+                if(deleteAllBtn) deleteAllBtn.style.display = 'inline-block';
                 if(dataTable) dataTable.style.display = tableData.length ? '' : 'none';
             } else {
                 formRows.forEach(e => e.style.display = 'none');
@@ -620,6 +731,8 @@
                 if(exportBtnLeft) exportBtnLeft.style.display = 'none';
                 if(exportBtnRight) exportBtnRight.style.display = 'inline-block';
                 if(importBtnLeft) importBtnLeft.style.display = 'none';
+                if(editBtn) editBtn.style.display = 'none';
+                if(deleteAllBtn) deleteAllBtn.style.display = 'none';
                 if(dataTable) dataTable.style.display = tableData.length ? '' : 'none';
             }
             renderTable();
@@ -631,52 +744,94 @@
             setCurrentDateTimeToTextFields();
             listenForData(); // تفعيل الاستماع للبيانات
         };
-        // دالة لتعبئة text1 و text2 بتاريخ ووقت الآن
+        // دالة لتعبئة start_time و end_time بتاريخ ووقت الآن
         function setCurrentDateTimeToTextFields() {
             const now = new Date();
             const formatted = formatDateTime(now);
-            document.getElementById('text1').value = formatted;
-            document.getElementById('text2').value = formatted;
+            document.getElementById('start_time').value = formatted;
+            document.getElementById('end_time').value = formatted;
+            document.getElementById('deadline').value = 'minutes';
+            document.getElementById('accuracy').value = '%';
+        }
+        function replaceJustificationWithInput() {
+            var select = document.getElementById('justification');
+            if (select.value === 'Other') {
+                var parent = select.parentNode;
+                var input = document.createElement('input');
+                input.type = 'text';
+                input.id = 'justification';
+                input.required = true;
+                input.placeholder = 'Type your reason here...';
+                input.className = select.className;
+                input.style.marginTop = '8px';
+                input.onblur = function() {
+                    restoreJustificationSelect(this.value);
+                };
+                parent.replaceChild(input, select);
+                input.focus();
+            }
+        }
+        function restoreJustificationSelect(value) {
+            var parent = document.querySelector('label[for="justification"]').parentNode;
+            var select = document.createElement('select');
+            select.id = 'justification';
+            select.required = true;
+            select.onchange = replaceJustificationWithInput;
+            select.innerHTML = '<option value="Excellent">Excellent</option><option value="Other">Other</option>';
+            if (value && value !== 'Excellent' && value !== 'Other') {
+                var opt = document.createElement('option');
+                opt.value = value;
+                opt.textContent = value;
+                opt.selected = true;
+                select.appendChild(opt);
+            }
+            parent.replaceChild(select, parent.querySelector('#justification'));
         }
         // دالة لمسح جميع الحقول بعد الإضافة أو الإظهار
         function clearInputs() {
-            document.getElementById('account').value = '';
-            document.getElementById('Task Name ').value = '';
-            document.getElementById('From').value = '';
-            document.getElementById('engineer').value = '';
-            document.getElementById('text1').value = '';
-            document.getElementById('text2').value = '';
-            document.getElementById('link1').value = '';
-            document.getElementById('note').value = '';
+            document.getElementById('task').value = '';
+            document.getElementById('type').value = '';
+            document.getElementById('start_time').value = '';
+            document.getElementById('end_time').value = '';
+            document.getElementById('deadline').value = 'minutes';
+            document.getElementById('status').value = '';
+            restoreJustificationSelect('Excellent');
+            document.getElementById('accuracy').value = '%';
         }
         // دالة لإضافة البيانات المدخلة إلى قاعدة بيانات Firebase
         function showData() {
-            const account = document.getElementById('account').value;
-            const TaskName  = document.getElementById('Task Name ').value;
-            const From  = document.getElementById('From').value;
-            const engineer = document.getElementById('engineer').value;
-            const text1 = document.getElementById('text1').value;
-            const text2 = document.getElementById('text2').value;
-            const link1 = document.getElementById('link1').value;
-            const note = document.getElementById('note').value;
-            if (!account || !From  || !engineer) {
-                alert('⚠️ Please select Project, From, and Engineer first!');
+            const task = document.getElementById('task').value;
+            const type = document.getElementById('type').value;
+            const start_time = document.getElementById('start_time').value;
+            const end_time = document.getElementById('end_time').value;
+            const deadline = document.getElementById('deadline').value;
+            const status = document.getElementById('status').value;
+            let justification = document.getElementById('justification').value;
+            const accuracy = document.getElementById('accuracy').value;
+            if (!task || !type || !start_time || !end_time || !deadline || !status || !justification || !accuracy) {
+                alert('⚠️ Please fill all fields!');
                 return;
             }
             const today = new Date();
-            const dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+            const dateStr = String(today.getDate()).padStart(2,'0') + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + today.getFullYear();
             const rowObj = {
-                data: [account, TaskName , From, engineer, text1, text2, link1, note],
+                task: task,
+                type: type,
+                start_time: start_time,
+                end_time: end_time,
+                deadline: deadline,
+                status: status,
+                justification: justification,
+                accuracy: accuracy,
                 date: dateStr,
                 user: loggedUser
             };
             // حفظ البيانات في Firebase
-            database.ref('rows').push(rowObj, function(error) {
+            database.ref('tasks').push(rowObj, function(error) {
                 if (error) {
                     alert('❌ Error saving data!');
                 } else {
                     clearInputs();
-                    setCurrentDateTimeToTextFields();
                 }
             });
         }
@@ -690,14 +845,14 @@
             if (thead) {
                 // إعادة بناء رأس الجدول
                 thead.innerHTML = `
-                    <th>Project</th>
-                    <th>Task Name </th>
-                    <th>From</th>
-                    <th>Engineer</th>
-                    <th>Sent Date + Time  </th>
-                    <th>Reply  Date + Time  </th>
-                    <th>Link</th>
-                    <th>Note</th>
+                    <th>Task</th>
+                    <th>Type</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Deadline</th>
+                    <th>Status</th>
+                    <th>Justification</th>
+                    <th>Accuracy</th>
                     <th>Date</th>
                     ${loggedUser ? '<th>Delete</th>' : ''}
                 `;
@@ -714,28 +869,48 @@
             }
             filteredData.forEach((rowObj, idx) => {
                 const tr = document.createElement('tr');
-                rowObj.data.forEach((cell, i) => {
-                    const td = document.createElement('td');
-                    // إذا كان text1 أو text2 (index 4 أو 5)
-                    if(i === 4 || i === 5) {
-                        td.textContent = formatDateTime(cell);
-                    } else {
-                        td.textContent = cell;
-                    }
-                    td.style.textAlign = 'center';
-                    td.style.verticalAlign = 'middle';
-                    // إذا كان العمود هو الرابط (العمود السابع index 6)
-                    if(i === 6) {
-                        td.classList.add('link-cell');
-                        td.title = cell; // لعرض الرابط كامل عند الوقوف عليه
-                    }
-                    tr.appendChild(td);
-                });
-                // عمود التاريخ
-                const dateTd = document.createElement('td');
-                dateTd.textContent = rowObj.date;
-                dateTd.style.textAlign = 'center';
-                tr.appendChild(dateTd);
+                
+                // إذا كانت البيانات في الشكل الجديد (object)
+                if (rowObj.task) {
+                    const fields = ['task', 'type', 'start_time', 'end_time', 'deadline', 'status', 'justification', 'accuracy'];
+                    fields.forEach(field => {
+                        const td = document.createElement('td');
+                        td.textContent = rowObj[field] || '';
+                        td.style.textAlign = 'center';
+                        td.style.verticalAlign = 'middle';
+                        tr.appendChild(td);
+                    });
+                    // عمود التاريخ مع التنسيق الجديد
+                    const dateTd = document.createElement('td');
+                    dateTd.textContent = formatDate(rowObj.date) || rowObj.date || '';
+                    dateTd.style.textAlign = 'center';
+                    tr.appendChild(dateTd);
+                } else {
+                    // الشكل القديم (rowObj.data)
+                    rowObj.data.forEach((cell, i) => {
+                        const td = document.createElement('td');
+                        // إذا كان text1 أو text2 (index 4 أو 5)
+                        if(i === 4 || i === 5) {
+                            td.textContent = formatDateTime(cell);
+                        } else {
+                            td.textContent = cell;
+                        }
+                        td.style.textAlign = 'center';
+                        td.style.verticalAlign = 'middle';
+                        // إذا كان العمود هو الرابط (العمود السابع index 6)
+                        if(i === 6) {
+                            td.classList.add('link-cell');
+                            td.title = cell; // لعرض الرابط كامل عند الوقوف عليه
+                        }
+                        tr.appendChild(td);
+                    });
+                    // عمود التاريخ
+                    const dateTd = document.createElement('td');
+                    dateTd.textContent = rowObj.date;
+                    dateTd.style.textAlign = 'center';
+                    tr.appendChild(dateTd);
+                }
+                
                 // عمود الحذف فقط إذا كان المستخدم الحالي هو من أضاف الصف
                 if (loggedUser) {
                     const deleteTd = document.createElement('td');
@@ -756,7 +931,7 @@
             if (typeof idx === 'number' && idx >= 0 && idx < tableData.length) {
                 if (confirm('Are you sure you want to delete this row?')) {
                     // البحث عن المفتاح في Firebase
-                    database.ref('rows').once('value', function(snapshot) {
+                    database.ref('tasks').once('value', function(snapshot) {
                         let i = 0;
                         snapshot.forEach(function(child) {
                             if (i === idx) {
@@ -780,6 +955,14 @@
             if (isNaN(date.getTime())) return dt;
             const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
             return date.toLocaleString('en-US', options).replace(' at ', ', ');
+        }
+        
+        // دالة لتنسيق التاريخ بحيث تكون السنة في النهاية
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return dateStr;
+            return String(date.getDate()).padStart(2,'0') + '-' + String(date.getMonth()+1).padStart(2,'0') + '-' + date.getFullYear();
         }
         // دالة لتصدير البيانات الظاهرة في الجدول إلى ملف إكسل
         function exportToExcel() {
@@ -818,12 +1001,25 @@
         }
         // جلب البيانات من Firebase وتحديث الجدول تلقائياً
         function listenForData() {
+            // الاستماع للبيانات القديمة (rows)
             database.ref('rows').on('value', function(snapshot) {
                 tableData = [];
                 snapshot.forEach(function(child) {
                     tableData.push(child.val());
                 });
                 renderTable();
+            });
+            
+            // الاستماع للبيانات الجديدة (tasks)
+            database.ref('tasks').on('value', function(snapshot) {
+                const newTableData = [];
+                snapshot.forEach(function(child) {
+                    newTableData.push(child.val());
+                });
+                if (newTableData.length > 0) {
+                    tableData = newTableData;
+                    renderTable();
+                }
             });
         }
         function importFromExcel(event) {
@@ -841,7 +1037,7 @@
                     const row = rows[i];
                     if (!row || row.length < 8) continue; // تجاهل الصفوف الناقصة
                     const today = new Date();
-                    const dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+                    const dateStr = String(today.getDate()).padStart(2,'0') + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + today.getFullYear();
                     const rowObj = {
                         data: [row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]],
                         date: dateStr,
