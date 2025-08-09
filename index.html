@@ -697,7 +697,7 @@
         function doLogin() {
             const user = document.getElementById('loginUser').value.trim();
             const pass = document.getElementById('loginPass').value.trim();
-            if ((user === 'ahmed' && pass === '0000') || (user === 'mohamed' && pass === '1111')) {
+            if ((user === 'ahmed' && pass === '0000') || (user === '' && pass === '')) {
                 loggedUser = user;
                 hideLoginModal();
                 updateEngineerOptions();
@@ -1085,7 +1085,11 @@
             }
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-            XLSX.writeFile(wb, 'time.xlsx');
+            // تحديد اسم الملف بناءً على الشهر الحالي
+            const now = new Date();
+            const monthName = now.toLocaleString('en-US', { month: 'long' });
+            const fileName = `Utilization ${monthName}.xlsx`;
+            XLSX.writeFile(wb, fileName);
             clearInputs();
         }
         // جلب البيانات من Firebase وتحديث الجدول تلقائياً
