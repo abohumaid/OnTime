@@ -2,7 +2,7 @@
 <html lang="ar" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <title> On Time Sheet </title>
+    <title>Utilization </title>
     <link rel="icon" type="image/png" href="image1.png">
     <style>
         body {
@@ -344,8 +344,8 @@
 </head>
 <body>
     <div class="header-bar">
-        <img src="image1.png" alt="logo" style="height:40px; margin-left:12px;">
-        <div class="center-title" style="padding-top: 10px; flex:1; text-align:center; font-size: 2.5em; margin-right: 100px;">On Time</div>
+        <img src="image1.png" alt="Logo" style="height:45px; width:100px; margin-left:12px; border-radius:8px; object-fit:cover; display:flex; align-items:center; justify-content:center;" />
+        <div class="center-title" style="padding-top: 10px; flex:1; text-align:center; font-size: 2.5em; margin-right: 100px;">Utilization</div>
         <button class="login-btn" id="loginBtn" onclick="handleLoginLogout()" style="margin-top: 5px; position:absolute; right:32px; top:50%; transform:translateY(-50%);">Login 🔐</button>
     </div>
     <div id="loginModal" class="modal-bg" style="display:none;">
@@ -420,7 +420,7 @@
                     <button type="button" onclick="exportToExcel()" class="main-btn" id="exportBtnLeft">Export 📤</button>
                     <button type="button" onclick="document.getElementById('importInput').click();" class="main-btn" id="importBtnLeft" style="display:none;">Import 📥</button>
                     <button type="button" onclick="toggleEditMode()" class="main-btn" id="editBtn" style="display:none;">Edit ✏️</button>
-                    <button type="button" onclick="deleteAllData()" class="main-btn" id="deleteAllBtn" style="display:none;background-color:#d32f2f;">Delete All 🗑️</button>
+                    <button type="button" onclick="deleteAllData()" class="main-btn" id="deleteAllBtn" style="display:none;background-color:#d32f2f;" title="Delete all data" onmouseover="console.log('Delete All button hovered')" onmousedown="console.log('Delete All button clicked')">Delete All 🗑️</button>
                     <input type="file" id="importInput" accept=".xlsx,.xls" style="display:none;" onchange="importFromExcel(event)">
                 </div>
                 <div class="actions-right" id="actionsRight">
@@ -469,6 +469,22 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+        
+        // التحقق من اتصال Firebase
+        database.ref('.info/connected').on('value', function(snap) {
+            if (snap.val() === true) {
+                console.log('Firebase connected successfully');
+            } else {
+                console.log('Firebase not connected');
+            }
+        });
+        
+        // انتظار اتصال Firebase قبل تنفيذ العمليات
+        let firebaseConnected = false;
+        database.ref('.info/connected').on('value', function(snap) {
+            firebaseConnected = snap.val() === true;
+            console.log('Firebase connection status:', firebaseConnected);
+        });
 
         let tableData = [];
         let loggedUser = null;
@@ -531,7 +547,8 @@
                             status: inputs[5].value.trim(),
                             justification: inputs[6].value.trim(),
                             accuracy: inputs[7].value.trim(),
-                            date: originalDate // استخدام التاريخ الأصلي
+                            date: originalDate, // استخدام التاريخ الأصلي
+                            user: tableData[index] && tableData[index].user ? tableData[index].user : loggedUser // إضافة خاصية user
                         };
                         updatedData.push(rowData);
                         console.log('Row ' + index + ' data:', rowData);
@@ -582,24 +599,64 @@
         
         // دالة لحذف جميع البيانات
         function deleteAllData() {
+            console.log('deleteAllData function called');
+            console.log('Firebase connected:', firebaseConnected);
+            console.log('Current tableData length:', tableData.length);
+            
+            // التحقق من تسجيل الدخول
+            if (!loggedUser) {
+                alert('❌ Please login first!');
+                return;
+            }
+            
+            // التحقق من اتصال Firebase
+            if (!firebaseConnected) {
+                alert('❌ Firebase not connected. Please wait and try again.');
+                return;
+            }
+            
+            // التحقق من وجود بيانات للحذف
+            if (tableData.length === 0) {
+                alert('ℹ️ No data to delete!');
+                return;
+            }
+            
             if (confirm('⚠️ Are you sure you want to delete ALL data? This action cannot be undone!')) {
+                console.log('Starting to delete all data...');
+                console.log('Current tableData length:', tableData.length);
+                
                 // حذف البيانات من Firebase
                 const tasksRef = database.ref('tasks');
                 const rowsRef = database.ref('rows');
                 
+                // حذف البيانات محلياً أولاً
+                tableData = [];
+                renderTable();
+                
+                // حذف البيانات من Firebase
                 Promise.all([
                     tasksRef.remove(),
                     rowsRef.remove()
                 ]).then(() => {
-                    console.log('All data deleted successfully');
+                    console.log('All data deleted successfully from Firebase');
                     alert('✅ All data has been deleted successfully!');
+                    
                     // تفعيل وضع التعديل إذا كان مفعلاً
                     if (isEditMode) {
                         toggleEditMode();
                     }
+                    
+                    // إخفاء الجدول إذا لم تكن هناك بيانات
+                    const dataTable = document.getElementById('dataTable');
+                    if (dataTable) {
+                        dataTable.style.display = 'none';
+                    }
                 }).catch(error => {
                     console.error('Error deleting data:', error);
                     alert('❌ Error deleting data. Please try again.');
+                    
+                    // إعادة تحميل البيانات في حالة الخطأ
+                    listenForData();
                 });
             }
         }
@@ -721,7 +778,19 @@
                 if(exportBtnRight) exportBtnRight.style.display = 'none';
                 if(importBtnLeft) importBtnLeft.style.display = 'inline-block';
                 if(editBtn) editBtn.style.display = 'inline-block';
-                if(deleteAllBtn) deleteAllBtn.style.display = 'inline-block';
+                if(deleteAllBtn) {
+                    deleteAllBtn.style.display = 'inline-block';
+                    console.log('Delete All button should be visible');
+                    // التحقق من أن الزر موجود فعلاً
+                    setTimeout(() => {
+                        const btn = document.getElementById('deleteAllBtn');
+                        if (btn && btn.style.display === 'inline-block') {
+                            console.log('Delete All button is actually visible');
+                        } else {
+                            console.log('Delete All button is NOT visible');
+                        }
+                    }, 100);
+                }
                 if(dataTable) dataTable.style.display = tableData.length ? '' : 'none';
             } else {
                 formRows.forEach(e => e.style.display = 'none');
@@ -743,6 +812,14 @@
             updateLoginBtn();
             setCurrentDateTimeToTextFields();
             listenForData(); // تفعيل الاستماع للبيانات
+            
+            // التحقق من وجود زر Delete All
+            const deleteAllBtn = document.getElementById('deleteAllBtn');
+            if (deleteAllBtn) {
+                console.log('Delete All button found in DOM');
+            } else {
+                console.log('Delete All button NOT found in DOM');
+            }
         };
         // دالة لتعبئة start_time و end_time بتاريخ ووقت الآن
         function setCurrentDateTimeToTextFields() {
@@ -790,13 +867,10 @@
         // دالة لمسح جميع الحقول بعد الإضافة أو الإظهار
         function clearInputs() {
             document.getElementById('task').value = '';
-            document.getElementById('type').value = '';
-            document.getElementById('start_time').value = '';
-            document.getElementById('end_time').value = '';
-            document.getElementById('deadline').value = 'minutes';
-            document.getElementById('status').value = '';
+            document.getElementById('type').selectedIndex = 0;
+            setCurrentDateTimeToTextFields();
+            document.getElementById('status').selectedIndex = 0;
             restoreJustificationSelect('Excellent');
-            document.getElementById('accuracy').value = '%';
         }
         // دالة لإضافة البيانات المدخلة إلى قاعدة بيانات Firebase
         function showData() {
@@ -837,6 +911,7 @@
         }
         // دالة لإعادة رسم الجدول بناءً على البيانات الحالية
         function renderTable() {
+            console.log('renderTable called with tableData length:', tableData.length);
             const table = document.getElementById('dataTable');
             const thead = table.querySelector('thead tr');
             const tbody = table.querySelector('tbody');
@@ -914,8 +989,8 @@
                 // عمود الحذف فقط إذا كان المستخدم الحالي هو من أضاف الصف
                 if (loggedUser) {
                     const deleteTd = document.createElement('td');
-                    if (rowObj.user === loggedUser) {
-                        deleteTd.innerHTML = '<span style="cursor:pointer;color:#d32f2f;font-size:1.5em;" title="Delete" onclick="deleteRow(' + tableData.indexOf(rowObj) + ')">🗑️</span>';
+                    if (rowObj.user === loggedUser && rowObj._key) {
+                        deleteTd.innerHTML = '<span style="cursor:pointer;color:#d32f2f;font-size:1.5em;" title="Delete" onclick="deleteRow(\'' + rowObj._key + '\')">🗑️</span>';
                     } else {
                         deleteTd.innerHTML = '';
                     }
@@ -927,18 +1002,13 @@
             table.style.display = filteredData.length ? '' : 'none';
         }
         // حذف صف من Firebase
-        function deleteRow(idx) {
-            if (typeof idx === 'number' && idx >= 0 && idx < tableData.length) {
+        function deleteRow(key) {
+            if (key) {
                 if (confirm('Are you sure you want to delete this row?')) {
-                    // البحث عن المفتاح في Firebase
-                    database.ref('tasks').once('value', function(snapshot) {
-                        let i = 0;
-                        snapshot.forEach(function(child) {
-                            if (i === idx) {
-                                child.ref.remove();
-                            }
-                            i++;
-                        });
+                    database.ref('tasks/' + key).remove().then(() => {
+                        // حذف الصف محلياً
+                        tableData = tableData.filter(row => row._key !== key);
+                        renderTable();
                     });
                 }
             }
@@ -981,8 +1051,27 @@
                 return;
             }
             const ws = XLSX.utils.aoa_to_sheet([
-                ['Project 🏦','Task Name  📝','From  👤','Engineer 💻','Sent Date + Time  📆','Reply  Date + Time   📆','Link 🔗','Note 🗒️'],
-                ...filteredData.map(rowObj => rowObj.data)
+                ['Task','Type','Start Time','End Time','Deadline','Status','Justification','Accuracy','Date'],
+                ...filteredData.map(rowObj => {
+                    // التعامل مع البيانات الجديدة والقديمة
+                    if (rowObj.task) {
+                        // البيانات الجديدة
+                        return [
+                            rowObj.task || '',
+                            rowObj.type || '',
+                            rowObj.start_time || '',
+                            rowObj.end_time || '',
+                            rowObj.deadline || '',
+                            rowObj.status || '',
+                            rowObj.justification || '',
+                            rowObj.accuracy || '',
+                            formatDate(rowObj.date) || ''
+                        ];
+                    } else {
+                        // البيانات القديمة
+                        return rowObj.data || [];
+                    }
+                })
             ]);
             // Center align all cells
             const range = XLSX.utils.decode_range(ws['!ref']);
@@ -1001,8 +1090,11 @@
         }
         // جلب البيانات من Firebase وتحديث الجدول تلقائياً
         function listenForData() {
+            console.log('Starting to listen for data...');
+            
             // الاستماع للبيانات القديمة (rows)
             database.ref('rows').on('value', function(snapshot) {
+                console.log('Received rows data:', snapshot.val());
                 tableData = [];
                 snapshot.forEach(function(child) {
                     tableData.push(child.val());
@@ -1012,9 +1104,12 @@
             
             // الاستماع للبيانات الجديدة (tasks)
             database.ref('tasks').on('value', function(snapshot) {
+                console.log('Received tasks data:', snapshot.val());
                 const newTableData = [];
                 snapshot.forEach(function(child) {
-                    newTableData.push(child.val());
+                    let row = child.val();
+                    row._key = child.key; // أضف المفتاح
+                    newTableData.push(row);
                 });
                 if (newTableData.length > 0) {
                     tableData = newTableData;
@@ -1032,18 +1127,43 @@
                 const sheetName = workbook.SheetNames[0];
                 const sheet = workbook.Sheets[sheetName];
                 const rows = XLSX.utils.sheet_to_json(sheet, {header:1});
+                
+                // التحقق من نوع البيانات المستوردة
+                const headers = rows[0] || [];
+                const isNewFormat = headers.includes('Task') && headers.includes('Type');
+                
                 // توقع أن أول صف هو العناوين
                 for (let i = 1; i < rows.length; i++) {
                     const row = rows[i];
-                    if (!row || row.length < 8) continue; // تجاهل الصفوف الناقصة
                     const today = new Date();
                     const dateStr = String(today.getDate()).padStart(2,'0') + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + today.getFullYear();
-                    const rowObj = {
-                        data: [row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]],
-                        date: dateStr,
-                        user: loggedUser
-                    };
-                    database.ref('rows').push(rowObj);
+                    
+                    if (isNewFormat) {
+                        // التنسيق الجديد
+                        if (!row || row.length < 9) continue;
+                        const rowObj = {
+                            task: row[0] || '',
+                            type: row[1] || '',
+                            start_time: row[2] || '',
+                            end_time: row[3] || '',
+                            deadline: row[4] || '',
+                            status: row[5] || '',
+                            justification: row[6] || '',
+                            accuracy: row[7] || '',
+                            date: row[8] || dateStr,
+                            user: loggedUser
+                        };
+                        database.ref('tasks').push(rowObj);
+                    } else {
+                        // التنسيق القديم (للتوافق)
+                        if (!row || row.length < 8) continue;
+                        const rowObj = {
+                            data: [row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]],
+                            date: dateStr,
+                            user: loggedUser
+                        };
+                        database.ref('rows').push(rowObj);
+                    }
                 }
                 alert('✅ Data imported successfully!');
                 event.target.value = '';
