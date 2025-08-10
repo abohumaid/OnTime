@@ -909,6 +909,12 @@
                 }
             });
         }
+        function parseDMY(dateStr) {
+            // يحول 10-08-2025 إلى كائن Date
+            if (!dateStr) return null;
+            const [day, month, year] = dateStr.split('-');
+            return new Date(`${year}-${month}-${day}`);
+        }
         // دالة لإعادة رسم الجدول بناءً على البيانات الحالية
         function renderTable() {
             console.log('renderTable called with tableData length:', tableData.length);
@@ -937,10 +943,18 @@
             const to = document.getElementById('filterTo').value;
             let filteredData = tableData;
             if (from) {
-                filteredData = filteredData.filter(rowObj => rowObj.date >= from);
+                const fromDate = new Date(from);
+                filteredData = filteredData.filter(rowObj => {
+                    const rowDate = parseDMY(rowObj.date);
+                    return rowDate && rowDate >= fromDate;
+                });
             }
             if (to) {
-                filteredData = filteredData.filter(rowObj => rowObj.date <= to);
+                const toDate = new Date(to);
+                filteredData = filteredData.filter(rowObj => {
+                    const rowDate = parseDMY(rowObj.date);
+                    return rowDate && rowDate <= toDate;
+                });
             }
             filteredData.forEach((rowObj, idx) => {
                 const tr = document.createElement('tr');
@@ -1040,11 +1054,24 @@
             const from = document.getElementById('filterFrom').value;
             const to = document.getElementById('filterTo').value;
             let filteredData = tableData;
+            function parseDMY(dateStr) {
+                if (!dateStr) return null;
+                const [day, month, year] = dateStr.split('-');
+                return new Date(`${year}-${month}-${day}`);
+            }
             if (from) {
-                filteredData = filteredData.filter(rowObj => rowObj.date >= from);
+                const fromDate = new Date(from);
+                filteredData = filteredData.filter(rowObj => {
+                    const rowDate = parseDMY(rowObj.date);
+                    return rowDate && rowDate >= fromDate;
+                });
             }
             if (to) {
-                filteredData = filteredData.filter(rowObj => rowObj.date <= to);
+                const toDate = new Date(to);
+                filteredData = filteredData.filter(rowObj => {
+                    const rowDate = parseDMY(rowObj.date);
+                    return rowDate && rowDate <= toDate;
+                });
             }
             if (filteredData.length === 0) {
                 alert('⚠️ Please enter data first by clicking Show 👁️');
