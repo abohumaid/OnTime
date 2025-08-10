@@ -505,16 +505,23 @@
                 const deleteAllBtn = document.getElementById('deleteAllBtn');
                 if (deleteAllBtn) deleteAllBtn.style.display = 'none';
                 
-                // جعل جميع الخلايا قابلة للتعديل ما عدا Date و Delete
-                const cells = table.querySelectorAll('td:not(:nth-last-child(1)):not(:nth-last-child(2))'); // استثناء عمود Date و Delete
-                cells.forEach(cell => {
-                    const originalText = cell.textContent.trim();
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.value = originalText;
-                    input.style.cssText = 'width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;';
-                    cell.textContent = '';
-                    cell.appendChild(input);
+                // جعل جميع الخلايا قابلة للتعديل ما عدا عمود الحذف فقط
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    // استثناء عمود الحذف فقط (الأخير)
+                    const cells = row.querySelectorAll('td');
+                    // إذا كان هناك عمود حذف (tasks أو data)
+                    let editableCellsCount = cells.length - (loggedUser ? 1 : 0);
+                    for (let i = 0; i < editableCellsCount; i++) {
+                        const cell = cells[i];
+                        const originalText = cell.textContent.trim();
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.value = originalText;
+                        input.style.cssText = 'width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;';
+                        cell.textContent = '';
+                        cell.appendChild(input);
+                    }
                 });
             } else {
                 // حفظ التعديلات
@@ -530,28 +537,37 @@
                 // جمع البيانات المعدلة وحفظها
                 const rows = table.querySelectorAll('tbody tr');
                 const updatedData = [];
-                
                 rows.forEach((row, index) => {
                     const inputs = row.querySelectorAll('input');
                     if (inputs.length > 0) {
-                        // الحصول على التاريخ من الخلية الأصلية (غير قابلة للتعديل)
-                        const dateCell = row.querySelector('td:nth-last-child(2)');
-                        const originalDate = dateCell ? dateCell.textContent.trim() : '';
-                        
-                        const rowData = {
-                            task: inputs[0].value.trim(),
-                            type: inputs[1].value.trim(),
-                            start_time: inputs[2].value.trim(),
-                            end_time: inputs[3].value.trim(),
-                            deadline: inputs[4].value.trim(),
-                            status: inputs[5].value.trim(),
-                            justification: inputs[6].value.trim(),
-                            accuracy: inputs[7].value.trim(),
-                            date: originalDate, // استخدام التاريخ الأصلي
-                            user: tableData[index] && tableData[index].user ? tableData[index].user : loggedUser // إضافة خاصية user
-                        };
-                        updatedData.push(rowData);
-                        console.log('Row ' + index + ' data:', rowData);
+                        // إذا كان الصف أصله من نوع task
+                        if (tableData[index] && tableData[index].task) {
+                            const rowData = {
+                                task: inputs[0].value.trim(),
+                                type: inputs[1].value.trim(),
+                                start_time: inputs[2].value.trim(),
+                                end_time: inputs[3].value.trim(),
+                                deadline: inputs[4].value.trim(),
+                                status: inputs[5].value.trim(),
+                                justification: inputs[6].value.trim(),
+                                accuracy: inputs[7].value.trim(),
+                                date: inputs[8].value.trim(), // التاريخ المعدل
+                                user: tableData[index] && tableData[index].user ? tableData[index].user : loggedUser
+                            };
+                            updatedData.push(rowData);
+                        } else if (tableData[index] && tableData[index].data) {
+                            // إذا كان الصف أصله من نوع data
+                            const dataArr = [];
+                            for (let i = 0; i < inputs.length - 1; i++) {
+                                dataArr.push(inputs[i].value.trim());
+                            }
+                            const rowData = {
+                                data: dataArr,
+                                date: inputs[inputs.length - 1].value.trim(), // التاريخ المعدل
+                                user: tableData[index] && tableData[index].user ? tableData[index].user : loggedUser
+                            };
+                            updatedData.push(rowData);
+                        }
                     }
                 });
                 
@@ -915,6 +931,21 @@
             const [day, month, year] = dateStr.split('-');
             return new Date(`${year}-${month}-${day}`);
         }
+        // دالة لتحويل التاريخ من mm/dd/yyyy أو dd-mm-yyyy إلى كائن Date
+        function parseDateFlexible(dateStr) {
+            if (!dateStr) return null;
+            if (dateStr.includes('-')) {
+                // dd-mm-yyyy
+                const [day, month, year] = dateStr.split('-');
+                return new Date(`${year}-${month}-${day}`);
+            } else if (dateStr.includes('/')) {
+                // mm/dd/yyyy
+                const [month, day, year] = dateStr.split('/');
+                return new Date(`${year}-${month}-${day}`);
+            } else {
+                return new Date(dateStr);
+            }
+        }
         // دالة لإعادة رسم الجدول بناءً على البيانات الحالية
         function renderTable() {
             console.log('renderTable called with tableData length:', tableData.length);
@@ -945,14 +976,14 @@
             if (from) {
                 const fromDate = new Date(from);
                 filteredData = filteredData.filter(rowObj => {
-                    const rowDate = parseDMY(rowObj.date);
+                    const rowDate = parseDateFlexible(rowObj.date);
                     return rowDate && rowDate >= fromDate;
                 });
             }
             if (to) {
                 const toDate = new Date(to);
                 filteredData = filteredData.filter(rowObj => {
-                    const rowDate = parseDMY(rowObj.date);
+                    const rowDate = parseDateFlexible(rowObj.date);
                     return rowDate && rowDate <= toDate;
                 });
             }
@@ -995,7 +1026,7 @@
                     });
                     // عمود التاريخ
                     const dateTd = document.createElement('td');
-                    dateTd.textContent = rowObj.date;
+                    dateTd.textContent = formatDate(rowObj.date);
                     dateTd.style.textAlign = 'center';
                     tr.appendChild(dateTd);
                 }
@@ -1041,12 +1072,26 @@
             return date.toLocaleString('en-US', options).replace(' at ', ', ');
         }
         
-        // دالة لتنسيق التاريخ بحيث تكون السنة في النهاية
+        // دالة لتنسيق التاريخ بحيث يكون mm/dd/yyyy
         function formatDate(dateStr) {
             if (!dateStr) return '';
-            const date = new Date(dateStr);
+            // يدعم dd-mm-yyyy أو mm/dd/yyyy أو yyyy-mm-dd
+            let date;
+            if (dateStr.includes('-')) {
+                // dd-mm-yyyy
+                const [day, month, year] = dateStr.split('-');
+                date = new Date(`${year}-${month}-${day}`);
+            } else if (dateStr.includes('/')) {
+                // mm/dd/yyyy
+                const [month, day, year] = dateStr.split('/');
+                date = new Date(`${year}-${month}-${day}`);
+            } else {
+                date = new Date(dateStr);
+            }
             if (isNaN(date.getTime())) return dateStr;
-            return String(date.getDate()).padStart(2,'0') + '-' + String(date.getMonth()+1).padStart(2,'0') + '-' + date.getFullYear();
+            return String(date.getMonth() + 1).padStart(2, '0') + '/' +
+                   String(date.getDate()).padStart(2, '0') + '/' +
+                   date.getFullYear();
         }
         // دالة لتصدير البيانات الظاهرة في الجدول إلى ملف إكسل
         function exportToExcel() {
@@ -1054,22 +1099,29 @@
             const from = document.getElementById('filterFrom').value;
             const to = document.getElementById('filterTo').value;
             let filteredData = tableData;
-            function parseDMY(dateStr) {
+            function parseDateFlexible(dateStr) {
                 if (!dateStr) return null;
-                const [day, month, year] = dateStr.split('-');
-                return new Date(`${year}-${month}-${day}`);
+                if (dateStr.includes('-')) {
+                    const [day, month, year] = dateStr.split('-');
+                    return new Date(`${year}-${month}-${day}`);
+                } else if (dateStr.includes('/')) {
+                    const [month, day, year] = dateStr.split('/');
+                    return new Date(`${year}-${month}-${day}`);
+                } else {
+                    return new Date(dateStr);
+                }
             }
             if (from) {
                 const fromDate = new Date(from);
                 filteredData = filteredData.filter(rowObj => {
-                    const rowDate = parseDMY(rowObj.date);
+                    const rowDate = parseDateFlexible(rowObj.date);
                     return rowDate && rowDate >= fromDate;
                 });
             }
             if (to) {
                 const toDate = new Date(to);
                 filteredData = filteredData.filter(rowObj => {
-                    const rowDate = parseDMY(rowObj.date);
+                    const rowDate = parseDateFlexible(rowObj.date);
                     return rowDate && rowDate <= toDate;
                 });
             }
